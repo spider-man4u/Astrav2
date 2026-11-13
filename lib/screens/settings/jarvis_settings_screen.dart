@@ -364,7 +364,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: const Text(
-                'Desk mode: listens silently in the background, ignores room chatter, and wakes on "Hey Jarvis"',
+                'Desk mode: listens silently in the background, ignores room chatter, and wakes on "Hey ASTRA"',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.jarvisAlwaysOn,
@@ -388,11 +388,12 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: const Text(
-                'Broadcast-grade natural human voice synthesis (auto-falls back offline)',
+                'Online neural voice sends response text to Microsoft Edge TTS. Enable this only when you accept that disclosure.',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.useNeuralVoice,
               onChanged: (val) async {
+                await _settings.setRemoteTtsEnabled(val);
                 await _settings.setUseNeuralVoice(val);
                 setState(() {});
               },
@@ -405,7 +406,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Select the studio human voice for Jarvis spoken responses.',
+              'Select the online neural voice used for ASTRA responses.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -2240,24 +2241,6 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
               value: _settings.localFirstPrivacyMode,
               onChanged: (val) async {
                 await _settings.setLocalFirstPrivacyMode(val);
-                setState(() {});
-              },
-            ),
-            const Divider(height: 20),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text(
-                'Allow Online Neural Voice',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-              subtitle: const Text(
-                'When enabled, response text is sent to Microsoft Edge TTS for speech synthesis. Off by default.',
-                style: TextStyle(fontSize: 12),
-              ),
-              value: _settings.remoteTtsEnabled,
-              onChanged: (val) async {
-                await _settings.setRemoteTtsEnabled(val);
-                await _settings.setUseNeuralVoice(val);
                 setState(() {});
               },
             ),
