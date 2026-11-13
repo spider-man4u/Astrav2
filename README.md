@@ -1,9 +1,9 @@
 <div align="center">
 
-# ⚡ J.A.R.V.I.S. (PrivateAgent)
+# ✦ ASTRA — Offline-First Personal Assistant
 
-### **Autonomous, Self-Evolving On-Device AI Assistant & Android UI Automation Agent**
-*Architected and Engineered with Precision by **Abuzar***
+### **On-device AI companion & Android automation framework**
+*ASTRA fork of JARVIS / PrivateAgent — original foundation by **Abuzar Ansarii***
 
 ---
 
@@ -12,13 +12,13 @@
 [![Android](https://img.shields.io/badge/Android-API%2026%2B%20(8.0--15)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Release](https://img.shields.io/badge/Release-v1.1.0-blue?style=for-the-badge&logo=github)](https://github.com/AbuZar-Ansarii/Jarvis/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local--First-00E5FF?style=for-the-badge&logo=shield&logoColor=black)](https://ollama.com)
+[![Privacy](https://img.shields.io/badge/Privacy-Offline--First-00E5FF?style=for-the-badge&logo=shield&logoColor=black)](https://ollama.com)
 [![Hermes](https://img.shields.io/badge/Hermes-Self--Evolving%20Engine-BA68C8?style=for-the-badge&logo=openai&logoColor=white)](https://nousresearch.com)
 [![UI](https://img.shields.io/badge/Design-Liquid%20Glass%20HUD-6366F1?style=for-the-badge&logo=material-design&logoColor=white)](https://flutter.dev)
 [![TTS](https://img.shields.io/badge/Audio-Microsoft%20Studio%20Neural-FFB300?style=for-the-badge&logo=microsoftexcel&logoColor=black)](https://azure.microsoft.com)
 
 <p align="center">
-  <b><i>"Your keys. Your data. Your device. Nothing leaves your phone except the LLM calls you authorize."</i></b>
+  <b><i>"Private by default. Online when a task genuinely needs it."</i></b>
 </p>
 
 </div>
@@ -27,7 +27,7 @@
 
 ## 🌟 System Overview
 
-**J.A.R.V.I.S.** (PrivateAgent) is an autonomous, on-device AI assistant, system automation framework, and cybernetic operating HUD for Android, architected and built by **Abuzar**. 
+**ASTRA** is an offline-first customization of the open-source JARVIS / PrivateAgent Android assistant originally authored by **Abuzar Ansarii**. ASTRA keeps core AI inference on the device by default while allowing separate online retrieval for current information and updates. 
 
 Unlike conventional voice assistants that merely return web searches or canned voice responses, J.A.R.V.I.S. acts as a true autonomous operator on your smartphone. By coupling on-device accessibility inspection, native sensor hardware access, multimodal machine vision, and OpenAI-compatible LLM backends (cloud or 100% offline via Ollama), J.A.R.V.I.S. can:
 
@@ -35,7 +35,7 @@ Unlike conventional voice assistants that merely return web searches or canned v
 - **Project Dual Cinematic 3D Holograms**: Render an interactive gyroscopic Arc Reactor consciousness core or a translucent 3D Iron Man hologram suit bust with dynamic audio-reactive aura colors.
 - **Sense Your Physical Environment**: Detect mid-air hand gestures using optical proximity hardware, monitor room movement using accelerometer watchdog sentries, and calculate aircraft overhead via ADS-B telemetry.
 - **Evolve and Self-Improve (Hermes Engine)**: Distill repetitive app interactions into executable macro skills and persist learned operator preferences across `SOUL.md`, `USER.md`, and `AGENT.md` context files.
-- **Guarantee Complete Privacy**: Built with a strict **Local-First Privacy Architecture** with zero embedded trackers, zero telemetry analytics, and complete compatibility with fully offline, on-device Ollama instances.
+- **Privacy by default**: Cloud AI inference and remote neural TTS are blocked unless explicitly enabled. Online retrieval is a separate capability and must not receive private memory or chat history by default. Persistent memory is still stored in SharedPreferences and is not encrypted yet; see [the privacy audit](docs/PRIVACY_AUDIT.md).
 
 ---
 
