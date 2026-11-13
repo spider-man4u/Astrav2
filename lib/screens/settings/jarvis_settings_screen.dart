@@ -93,7 +93,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             ),
             const SizedBox(width: 10),
             const Text(
-              'J.A.R.V.I.S.',
+              'ASTRA',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
