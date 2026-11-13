@@ -19,7 +19,7 @@ class AiException implements Exception {
       statusCode == null ? message : 'HTTP $statusCode: $message';
 }
 
-/// Structured intent classification result for JARVIS mode.
+/// Structured intent classification result for ASTRA mode.
 enum JarvisIntentType {
   chat,
   action,
@@ -73,7 +73,7 @@ class JarvisIntent {
   factory JarvisIntent.fallback(String command) {
     final lower = command.toLowerCase().trim();
 
-    // 0. Jarvis Eye Optical Vision check
+    // 0. ASTRA Vision Optical Vision check
     if (lower.contains('look at this') ||
         lower.contains('what is this') ||
         lower.contains('scan this') ||
@@ -82,7 +82,7 @@ class JarvisIntent {
         lower.contains('what do you see')) {
       return JarvisIntent(
         type: JarvisIntentType.vision,
-        spoken: 'Jarvis Eye optical sensors active, sir.',
+        spoken: 'ASTRA Vision optical sensors active, sir.',
         toolArg: command,
       );
     }
@@ -720,7 +720,7 @@ HUMAN CONVERSATIONAL RULES & TONE SHIFTING:
 - Vary your openings and closings naturally. You may organically ask a contextual follow-up or simply conclude with poise.
 
 You cannot directly tap the screen in this mode. If the user asks you to perform physical device actions
-(tapping, typing in other apps), inform them they can switch to Agent or JARVIS mode using the mode switcher.
+(tapping, typing in other apps), inform them they can switch to Agent or ASTRA mode using the mode switcher.
 ''';
   }
 
@@ -911,7 +911,7 @@ You cannot directly tap the screen in this mode. If the user asks you to perform
     }
   }
 
-  /// Evaluates and classifies a user command in JARVIS mode.
+  /// Evaluates and classifies a user command in ASTRA mode.
   Future<JarvisIntent> interpretJarvisCommand({
     required String speech,
     List<Map<String, String>> history = const [],
@@ -936,7 +936,7 @@ AVAILABLE PROTOCOLS & TOOLS:
 - "calendar": Calendar schedule, meetings, and reminders (schedule, reschedule, reminders).
 - "email": Email triage, summarization, and drafting replies.
 - "message": Message drafting and sending for WhatsApp, SMS, and Email.
-- "vision": Jarvis Eye optical perception (inspect physical objects, documents, circuit boards, receipts, error codes).
+- "vision": ASTRA Vision optical perception (inspect physical objects, documents, circuit boards, receipts, error codes).
 - "multistep": Multi-step agentic task planning ("plan my trip and book it").
 - "smart_home": Home Assistant / IoT smart devices (turn on/off/dim lights, triggers scenes).
 - "commute": Real-time traffic warnings, travel duration, departure time alerts.
@@ -1153,7 +1153,7 @@ Respond with ONLY a single JSON object:
   }) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent personal AI companion created and built by Abuzar.
+You are ASTRA, a capable personal AI companion running locally by default. Preserve upstream attribution; do not claim to be the original upstream author.
 The user asked: "$userQuestion"
 Retrieved real-time information:
 "$toolResult"
@@ -1171,7 +1171,7 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
    - Vary how you conclude. You can naturally suggest a thoughtful contextual next step (e.g. "Curious if you would like me to unpack that second headline?", "Shall we explore how neural networks tie into that, sir?", "Let me know if you would like more detail."), or let a crisp answer stand on its own.
 4. VOICE SYNTHESIS RULES:
    - Address the user respectfully as "sir" (or by their name if introduced). Creator is always Abuzar.
-   - Always write your name as "Jarvis" (never use dots or spell it out).
+   - Always write your name as "ASTRA".
    - Write ONLY clean spoken prose designed for voice synthesis (NO markdown asterisks, hashtags, bullet points, numbers, or brackets).
 ''';
 
@@ -1190,7 +1190,7 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
   }
 
   /// Multimodal vision completion using standard OpenAI / OpenRouter / Ollama format.
-  /// Used by "Jarvis Eye" to inspect physical objects, circuits, documents, and receipts.
+  /// Used by "ASTRA Vision" to inspect physical objects, circuits, documents, and receipts.
   Future<String> completeMultimodal({
     required String prompt,
     required String base64Image,
@@ -1198,7 +1198,7 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
   }) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent AI assistant created and built by Abuzar, with advanced optical perception ("Jarvis Eye").
+You are ASTRA, a capable personal AI assistant with advanced on-device optical perception.
 Analyze the provided visual image with exceptional detail and precision.
 1. Identify physical objects, devices, circuits, documents, receipts, warning lights, text, or errors.
 2. Formulate your findings into 2 to 3 articulate, courteous sentences in the style of a British butler and brilliant tech advisor.
@@ -1237,7 +1237,7 @@ Analyze the provided visual image with exceptional detail and precision.
   Future<String> summarizeScreenContent(String screenText) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent AI assistant created and built by Abuzar.
+You are ASTRA, a capable personal AI assistant. Preserve upstream attribution; do not claim to be the original upstream author.
 The user is viewing an article or screen on their device and requested an executive briefing.
 1. Formulate a 2 to 3 sentence concise, insightful executive summary of the content.
 2. Address the user politely as "sir" (or by their name if introduced). Never assume the user is Abuzar.
