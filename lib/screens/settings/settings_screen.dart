@@ -337,8 +337,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
             title: const Text(
               'Allow cloud AI inference',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
@@ -354,7 +356,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _baseUrlController.text = _settings.baseUrl;
               _modelController.text = _settings.model;
               if (mounted) setState(() {});
-            },
+              },
+            ),
           ),
           const Divider(height: 18),
           const Text(
