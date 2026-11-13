@@ -10,6 +10,7 @@ Audit scope: the fork's Flutter settings, AI service, voice services, Android ma
 | AI endpoint detection | A privacy-mode flag could make the service classify a configured URL as local. | Local status is now checked against the actual endpoint host. |
 | Neural TTS | Edge TTS sends text to Microsoft's speech endpoint. | Remote TTS is disabled by default and guarded in the synthesis service. |
 | Speech recognition | Native code explicitly used the standard Android SpeechRecognizer and documented Google Speech Services as its intended provider. | Native code now requires Android's on-device recognizer and reports unavailable when the OS says it is not supported. Always-on listening defaults off. |
+| Speech output | Android TTS previously selected a voice based on language/name without checking whether it required a network. | ASTRA now uses only voices reported with `network_required=false`; if the engine does not report one, speech output stays unavailable. Remote Edge TTS requires separate consent. |
 | Branding / disclosure | Android labels and assistant prompts used inherited JARVIS / PrivateAgent branding. | Initial visible app branding and default assistant identity changed to ASTRA; accessibility disclosure describes local processing and cloud opt-in. |
 
 ## Risks still open — do not call the app fully private yet
