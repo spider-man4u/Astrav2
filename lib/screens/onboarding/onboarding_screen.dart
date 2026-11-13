@@ -276,7 +276,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       theme,
       icon: Icons.accessibility_new_outlined,
       title: 'Enable screen control',
-      subtitle: 'PrivateAgent works through an Android accessibility service. '
+      subtitle: 'ASTRA works through an Android accessibility service. '
           'This is what lets it read the screen and tap buttons for you.',
       children: [
         Card(
@@ -295,8 +295,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 Expanded(
                   child: Text(
                     _serviceEnabled
-                        ? 'PrivateAgent Screen Control is enabled'
-                        : 'PrivateAgent Screen Control is OFF',
+                        ? 'ASTRA Screen Control is enabled'
+                        : 'ASTRA Screen Control is OFF',
                     style: theme.textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
