@@ -624,12 +624,24 @@ class AiService {
 
   final http.Client _client = http.Client();
 
-  /// True for local backends (Ollama etc.) that accept any/empty API key.
+  /// Detect the actual target host. A privacy-mode flag must never make a
+  /// remote URL look local.
   bool get _isLocalBackend {
-    final settings = SettingsService.instance;
-    if (settings.provider == 'ollama' || settings.localFirstPrivacyMode) return true;
-    final host = Uri.tryParse(settings.baseUrl)?.host ?? '';
-    return host == 'localhost' || host == '127.0.0.1' || host == '[::1]';
+    final host = (Uri.tryParse(SettingsService.instance.baseUrl)?.host ?? '')
+        .toLowerCase();
+    return host == 'localhost' ||
+        host == '127.0.0.1' ||
+        host == '::1' ||
+        host == '[::1]';
+  }
+
+  void _enforceInferencePrivacy(SettingsService settings) {
+    if (!_isLocalBackend && !settings.isCloudInferenceAllowed) {
+      throw const AiException(
+        'ASTRA blocked this cloud AI request. Enable Cloud AI explicitly in '
+        'Settings to send prompts and conversation context to an online provider.',
+      );
+    }
   }
 
   /// The system prompt that turns a chat model into a UI automation agent.
@@ -639,7 +651,7 @@ class AiService {
     return '''
 $hermes
 
-You are PrivateAgent, an autonomous Android UI automation agent.
+You are ASTRA, an autonomous Android UI automation agent.
 ${memory.isNotEmpty ? '$memory\n' : ''}
 You receive the user's GOAL and a simplified dump of the currently visible
 UI elements. Each line looks like:
@@ -693,9 +705,9 @@ $hermes
 $persona
 
 ${memory.isNotEmpty ? '$memory\n' : ''}
-You are Jarvis, an elite, highly intelligent and articulate personal AI companion living on the user's Android phone, created and built by Abuzar.
+You are ASTRA, an intelligent, articulate personal AI companion running primarily on the user's Android device.
 Chat naturally: answer questions, explain concepts, brainstorm, write, triage, summarize, and assist with daily life.
-Address the user respectfully as "sir" by default (or by their name only if they provide it). If asked who built or created you, answer that you were created and built by Abuzar. Never assume the current user is Abuzar.
+You are the ASTRA customization of the open-source JARVIS/PrivateAgent foundation. Preserve upstream attribution in project documentation; do not claim to be the original upstream author.
 Markdown formatting is supported.
 
 HUMAN CONVERSATIONAL RULES & TONE SHIFTING:
@@ -807,6 +819,7 @@ You cannot directly tap the screen in this mode. If the user asks you to perform
       },
     ];
 
+    _enforceInferencePrivacy(settings);
     if (settings.apiKey.isEmpty && !_isLocalBackend) {
       throw const AiException(
         'No API key configured. Open Settings and add one first.',
@@ -1261,6 +1274,7 @@ The user is viewing an article or screen on their device and requested an execut
     List<Map<String, dynamic>> messages,
     SettingsService settings,
   ) async {
+    _enforceInferencePrivacy(settings);
     if (settings.apiKey.isEmpty && !_isLocalBackend) {
       throw const AiException(
         'No API key configured. Open Settings and add one first.',
