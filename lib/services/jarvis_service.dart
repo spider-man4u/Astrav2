@@ -68,7 +68,7 @@ enum JarvisPhase {
 }
 
 /// Central controller for JARVIS Mode:
-/// - Always-On hands-free voice assistant with Wake Words ("Hey ASTRA", "Hello Jarvis", "Jarvis")
+/// - Always-On hands-free voice assistant with Wake Words ("Hey ASTRA", "Hello ASTRA", "Jarvis")
 /// - Ignores ambient room chatter in standby until wake word is recognized
 /// - Active conversational continuation window for hands-free follow-up queries
 /// - Hermes Self-Evolving Workflow Engine integration (Study, Night, Work, Cinema)
@@ -96,7 +96,7 @@ class JarvisService extends ChangeNotifier {
   String _lastJarvisSpeech = 'At your service, sir. Say "Hey ASTRA" anytime.';
   String get lastJarvisSpeech => _lastJarvisSpeech;
 
-  String _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
+  String _statusMessage = 'STANDBY // SAY "HEY ASTRA"';
   String get statusMessage => _statusMessage;
 
   String? _currentTaskGoal;
@@ -246,7 +246,7 @@ class JarvisService extends ChangeNotifier {
       if (_phase != JarvisPhase.executing) {
         _isAwake = false;
         _statusMessage = _shouldListenContinuously
-            ? 'STANDBY // SAY "HEY JARVIS"'
+            ? 'STANDBY // SAY "HEY ASTRA"'
             : 'READY // TAP TO TALK';
         notifyListeners();
       }
@@ -263,7 +263,7 @@ class JarvisService extends ChangeNotifier {
     _awakeTimer?.cancel();
     _lastUserSpeech = '';
     _statusMessage = _shouldListenContinuously
-        ? 'STANDBY // SAY "HEY JARVIS"'
+        ? 'STANDBY // SAY "HEY ASTRA"'
         : 'READY // TAP TO TALK';
     _phase = JarvisPhase.idle;
     notifyListeners();
@@ -382,7 +382,7 @@ class JarvisService extends ChangeNotifier {
       return before;
     }
 
-    // Only wake word was spoken: e.g. "Hey ASTRA" or "Jarvis"
+    // Only wake word was spoken: e.g. "Hey ASTRA" or "ASTRA"
     return '';
   }
 
@@ -411,7 +411,7 @@ class JarvisService extends ChangeNotifier {
     startListening();
     // Arm mid-air proximity sensor for zero-touch gestures while in JARVIS mode
     unawaited(AirGestureService.instance.start());
-    _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
+    _statusMessage = 'STANDBY // SAY "HEY ASTRA"';
     notifyListeners();
   }
 
@@ -441,7 +441,7 @@ class JarvisService extends ChangeNotifier {
       const msg =
           'Always-On continuous listening active, sir. Say "Hey ASTRA" anytime.';
       _lastJarvisSpeech = msg;
-      _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
+      _statusMessage = 'STANDBY // SAY "HEY ASTRA"';
       notifyListeners();
       await _voice.speak(msg);
     } else {
@@ -584,7 +584,7 @@ class JarvisService extends ChangeNotifier {
       _statusMessage = 'LISTENING // AUDIO RECEPTORS ACTIVE';
     } else {
       _phase = JarvisPhase.idle;
-      _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
+      _statusMessage = 'STANDBY // SAY "HEY ASTRA"';
     }
     notifyListeners();
 
@@ -648,7 +648,7 @@ class JarvisService extends ChangeNotifier {
             _statusMessage = _shouldListenContinuously
                 ? (_isAwake
                     ? 'LISTENING // AUDIO RECEPTORS ACTIVE'
-                    : 'STANDBY // SAY "HEY JARVIS"')
+                    : 'STANDBY // SAY "HEY ASTRA"')
                 : 'READY // TAP TO TALK';
             notifyListeners();
           }
@@ -749,7 +749,7 @@ class JarvisService extends ChangeNotifier {
       HapticFeedback.mediumImpact();
 
       if (wakeCommand.isEmpty) {
-        // User said ONLY "Hey ASTRA" or "Jarvis" -> Stay in LISTENING state waiting for command
+        // User said ONLY "Hey ASTRA" or "ASTRA" -> Stay in LISTENING state waiting for command
         _wakeUp();
         _phase = JarvisPhase.listening;
         _statusMessage = 'LISTENING // AUDIO RECEPTORS ACTIVE';
@@ -785,7 +785,7 @@ class JarvisService extends ChangeNotifier {
     if (_phase == JarvisPhase.listening) {
       _phase = _executor.isBusy ? JarvisPhase.executing : JarvisPhase.idle;
       _statusMessage = _shouldListenContinuously
-          ? 'STANDBY // SAY "HEY JARVIS"'
+          ? 'STANDBY // SAY "HEY ASTRA"'
           : 'READY // TAP TO TALK';
       notifyListeners();
     }
@@ -806,7 +806,7 @@ class JarvisService extends ChangeNotifier {
       await _voice.stopSpeaking();
       _phase = JarvisPhase.idle;
       _statusMessage = _shouldListenContinuously
-          ? 'STANDBY // SAY "HEY JARVIS"'
+          ? 'STANDBY // SAY "HEY ASTRA"'
           : 'READY // TAP TO TALK';
       notifyListeners();
     }
@@ -856,7 +856,7 @@ class JarvisService extends ChangeNotifier {
       _lastJarvisSpeech = reply;
       _phase = JarvisPhase.speaking;
       _statusMessage = _shouldListenContinuously
-          ? 'STANDBY // SAY "HEY JARVIS"'
+          ? 'STANDBY // SAY "HEY ASTRA"'
           : 'READY // TAP TO TALK';
       notifyListeners();
       await _voice.speak(reply);
