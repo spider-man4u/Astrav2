@@ -89,8 +89,9 @@ class VoiceService {
       final available =
           await _nativeSpeechChannel.invokeMethod<bool>('isAvailable') ?? true;
       _speechReady = available;
-    } catch (_) {
-      _speechReady = true;
+    } catch (e) {
+      debugPrint('[VoiceService] On-device speech availability check failed: $e');
+      _speechReady = false;
     }
     return _speechReady;
   }
@@ -248,10 +249,10 @@ class VoiceService {
   /// instead of spelling out letters like "J dot A dot R dot V dot I dot S".
   String sanitizeForSpeech(String text) {
     return text
-        .replaceAll(RegExp(r'J\.A\.R\.V\.I\.S\.?', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'\bJ\.A\.R\.V\.I\.S\b', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'J\s*\.\s*A\s*\.\s*R\s*\.\s*V\s*\.\s*I\s*\.\s*S\.?', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'\bJARVIS\b'), 'Jarvis')
+        .replaceAll(RegExp(r'J\.A\.R\.V\.I\.S\.?', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'\bJ\.A\.R\.V\.I\.S\b', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'J\s*\.\s*A\s*\.\s*R\s*\.\s*V\s*\.\s*I\s*\.\s*S\.?', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'\bJARVIS\b'), 'Astra')
         .replaceAll('*', '')
         .replaceAll('#', '')
         .replaceAll('`', '')
@@ -274,7 +275,8 @@ class VoiceService {
 
     try {
       // 1. Try Ultra-Realistic Studio Neural Voice if enabled
-      if (SettingsService.instance.useNeuralVoice) {
+      if (SettingsService.instance.remoteTtsEnabled &&
+          SettingsService.instance.useNeuralVoice) {
         try {
           final played = await EdgeTtsService.instance.speak(clean);
           if (played) {
