@@ -78,8 +78,22 @@ class SettingsService extends ChangeNotifier {
     'custom': (label: 'Custom (OpenAI-compatible)', baseUrl: '', model: ''),
   };
 
-  String get provider => _prefs?.getString('ai_provider') ?? 'deepseek';
+  /// Cloud AI is disabled by default. In that state ASTRA always resolves to
+  /// the local Ollama-compatible endpoint, even if an old cloud provider value
+  /// is still present in SharedPreferences.
+  bool get cloudInferenceEnabled =>
+      _prefs?.getBool('cloud_inference_enabled') ?? false;
+
+  bool get isCloudInferenceAllowed =>
+      cloudInferenceEnabled && !localFirstPrivacyMode;
+
+  String get provider => isCloudInferenceAllowed
+      ? (_prefs?.getString('ai_provider') ?? 'ollama')
+      : 'ollama';
+
   Future<void> setProvider(String value) async {
+    // Never let a provider chip silently switch private prompts to a cloud API.
+    if (value != 'ollama' && !isCloudInferenceAllowed) return;
     await _prefs?.setString('ai_provider', value);
     final preset = providers[value];
     if (preset != null && preset.baseUrl.isNotEmpty) {
@@ -89,10 +103,11 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get baseUrl =>
-      _prefs?.getString('ai_base_url') ??
-      providers[provider]?.baseUrl ??
-      providers['deepseek']!.baseUrl;
+  String get baseUrl => !isCloudInferenceAllowed
+      ? providers['ollama']!.baseUrl
+      : (_prefs?.getString('ai_base_url') ??
+          providers[provider]?.baseUrl ??
+          providers['ollama']!.baseUrl);
   Future<void> setBaseUrl(String value) async {
     await _prefs?.setString('ai_base_url', value.trim());
     notifyListeners();
@@ -104,10 +119,11 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get model =>
-      _prefs?.getString('ai_model') ??
-      providers[provider]?.model ??
-      'deepseek-chat';
+  String get model => !isCloudInferenceAllowed
+      ? providers['ollama']!.model
+      : (_prefs?.getString('ai_model') ??
+          providers[provider]?.model ??
+          providers['ollama']!.model);
   Future<void> setModel(String value) async {
     await _prefs?.setString('ai_model', value.trim());
     notifyListeners();
@@ -233,8 +249,8 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Whether JARVIS listens continuously like Google Home without tapping.
-  bool get jarvisAlwaysOn => _prefs?.getBool('jarvis_always_on') ?? true;
+  /// Continuous microphone listening is opt-in; on-device recognition is required.
+  bool get jarvisAlwaysOn => _prefs?.getBool('jarvis_always_on') ?? false;
   Future<void> setJarvisAlwaysOn(bool value) async {
     await _prefs?.setBool('jarvis_always_on', value);
     notifyListeners();
@@ -258,7 +274,7 @@ class SettingsService extends ChangeNotifier {
 
   /// Whether to prioritize ultra-realistic neural human voices over offline TTS.
   bool get useNeuralVoice =>
-      _prefs?.getBool('jarvis_use_neural_voice') ?? true;
+      remoteTtsEnabled && (_prefs?.getBool('jarvis_use_neural_voice') ?? false);
   Future<void> setUseNeuralVoice(bool value) async {
     await _prefs?.setBool('jarvis_use_neural_voice', value);
     notifyListeners();
@@ -272,15 +288,48 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Local-First Privacy Mode: forces on-device processing via local Ollama
-  /// (127.0.0.1:11434) and offline voice synthesis, zero cloud data leakage.
+  /// ASTRA's local-first mode is enabled on fresh installs.
+  /// Disabling it alone does NOT enable cloud inference; the separate cloud
+  /// consent switch must also be enabled.
   bool get localFirstPrivacyMode =>
-      _prefs?.getBool('local_first_privacy_mode') ?? false;
+      _prefs?.getBool('local_first_privacy_mode') ?? true;
+
   Future<void> setLocalFirstPrivacyMode(bool value) async {
     await _prefs?.setBool('local_first_privacy_mode', value);
     if (value) {
-      await setProvider('ollama');
-      await setUseNeuralVoice(false);
+      await _prefs?.setBool('cloud_inference_enabled', false);
+      await _prefs?.setString('ai_provider', 'ollama');
+      await _prefs?.setString('ai_base_url', providers['ollama']!.baseUrl);
+      await _prefs?.setString('ai_model', providers['ollama']!.model);
+      await _prefs?.setBool('remote_tts_enabled', false);
+      await _prefs?.setBool('jarvis_use_neural_voice', false);
+    }
+    notifyListeners();
+  }
+
+  /// Explicit consent gate for sending prompts and their conversation context
+  /// to a third-party/cloud language-model provider.
+  Future<void> setCloudInferenceEnabled(bool value) async {
+    await _prefs?.setBool('cloud_inference_enabled', value);
+    await _prefs?.setBool('local_first_privacy_mode', !value);
+    if (!value) {
+      await _prefs?.setString('ai_provider', 'ollama');
+      await _prefs?.setString('ai_base_url', providers['ollama']!.baseUrl);
+      await _prefs?.setString('ai_model', providers['ollama']!.model);
+      await _prefs?.setBool('jarvis_use_neural_voice', false);
+    }
+    notifyListeners();
+  }
+
+  /// Separate opt-in for sending synthesized response text to the remote
+  /// Microsoft Edge neural TTS endpoint.
+  bool get remoteTtsEnabled =>
+      _prefs?.getBool('remote_tts_enabled') ?? false;
+
+  Future<void> setRemoteTtsEnabled(bool value) async {
+    await _prefs?.setBool('remote_tts_enabled', value);
+    if (!value) {
+      await _prefs?.setBool('jarvis_use_neural_voice', false);
     }
     notifyListeners();
   }
