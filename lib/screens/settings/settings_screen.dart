@@ -367,12 +367,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             runSpacing: 8,
             children: [
               for (final entry in SettingsService.providers.entries)
-                if (entry.key == 'ollama' || _settings.isCloudInferenceAllowed)
+                if (entry.key == 'ollama' ||
+                    entry.key == 'llama_cpp' ||
+                    _settings.isCloudInferenceAllowed)
                   GlassPill(
-                  label: entry.value.label,
-                  isSelected: _settings.provider == entry.key,
-                  onTap: () => _settings.setProvider(entry.key),
-                ),
+                    label: entry.value.label,
+                    isSelected: _settings.provider == entry.key,
+                    onTap: () => _settings.setProvider(entry.key),
+                  ),
             ],
           ),
           const SizedBox(height: 18),
