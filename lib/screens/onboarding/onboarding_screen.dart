@@ -25,7 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   int _page = 0;
   bool _serviceEnabled = false;
-  String _provider = 'deepseek';
+  String _provider = 'ollama';
 
   @override
   void initState() {
@@ -276,7 +276,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       theme,
       icon: Icons.accessibility_new_outlined,
       title: 'Enable screen control',
-      subtitle: 'PrivateAgent works through an Android accessibility service. '
+      subtitle: 'ASTRA works through an Android accessibility service. '
           'This is what lets it read the screen and tap buttons for you.',
       children: [
         Card(
@@ -295,8 +295,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 Expanded(
                   child: Text(
                     _serviceEnabled
-                        ? 'PrivateAgent Screen Control is enabled'
-                        : 'PrivateAgent Screen Control is OFF',
+                        ? 'ASTRA Screen Control is enabled'
+                        : 'ASTRA Screen Control is OFF',
                     style: theme.textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -337,54 +337,62 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return _pageShell(
       theme,
       icon: Icons.key_outlined,
-      title: 'Connect an AI brain',
-      subtitle: 'Pick an OpenAI-compatible provider and paste your API key. '
-          'You can change this any time in Settings.',
+      title: 'Set up ASTRA local AI',
+      subtitle: 'ASTRA uses an on-device model by default. Online AI is optional and stays disabled until you explicitly enable it in Settings.',
       children: [
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             for (final entry in SettingsService.providers.entries)
-              ChoiceChip(
-                label: Text(entry.value.label),
-                selected: _provider == entry.key,
-                onSelected: (_) {
-                  setState(() => _provider = entry.key);
-                  _settings.setProvider(entry.key);
-                },
-              ),
+              if (entry.key == 'ollama' ||
+                  entry.key == 'llama_cpp' ||
+                  _settings.isCloudInferenceAllowed)
+                ChoiceChip(
+                  label: Text(entry.value.label),
+                  selected: _provider == entry.key,
+                  onSelected: (_) {
+                    setState(() => _provider = entry.key);
+                    _settings.setProvider(entry.key);
+                  },
+                ),
           ],
         ),
         const SizedBox(height: 16),
-        if (_provider == 'ollama')
+        if (_provider == 'ollama' || _provider == 'llama_cpp')
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'Ollama runs fully on your machine — no API key needed. '
-              'Start it with OLLAMA_HOST=0.0.0.0 ollama serve, then use '
-              'adb reverse tcp:11434 tcp:11434 so the phone can reach it.',
+              _provider == 'ollama'
+                  ? 'Ollama-compatible local server: ${_settings.baseUrl}. No cloud key is needed. The local server/model must be installed and running on this device.'
+                  : 'llama.cpp local server: ${_settings.baseUrl}. No cloud key is needed. We will add the bundled Android runtime and model manager in a later phase.',
               style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant, height: 1.5),
             ),
           ),
-        TextField(
-          controller: _apiKeyController,
-          obscureText: true,
-          onChanged: (v) => _settings.setApiKey(v),
-          decoration: const InputDecoration(
-            labelText: 'API key',
-            hintText: 'sk-…',
-            prefixIcon: Icon(Icons.vpn_key_outlined),
+        if (_settings.isCloudInferenceAllowed) ...[
+          TextField(
+            controller: _apiKeyController,
+            obscureText: true,
+            onChanged: (v) => _settings.setApiKey(v),
+            decoration: const InputDecoration(
+              labelText: 'Cloud provider API key',
+              hintText: 'Enter only if you chose to enable Cloud AI',
+              prefixIcon: Icon(Icons.vpn_key_outlined),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'The key is stored only on this device. The model can be changed '
-          'later (default: ${_settings.model}).',
-          style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant, height: 1.5),
-        ),
+          const SizedBox(height: 12),
+          Text(
+            'Cloud AI can send prompts and included context to the selected provider. Manage this permission in Settings.',
+            style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant, height: 1.5),
+          ),
+        ] else
+          Text(
+            'No API key is needed for local inference. A local model server must be running before ASTRA can answer with its own AI brain.',
+            style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant, height: 1.5),
+          ),
       ],
     );
   }

@@ -39,13 +39,13 @@ class HermesEvolutionService extends ChangeNotifier {
   // Default Markdown Templates (Hermes Tri-partite Spec)
   // ---------------------------------------------------------------------------
 
-  static const String defaultSoulMd = '''# SOUL.md — J.A.R.V.I.S. Core Identity & Constitution
+  static const String defaultSoulMd = '''# SOUL.md — ASTRA Core Identity & Constitution
 
 ## 1. Identity, Origin & Ethos
-- **Entity**: J.A.R.V.I.S. (Just A Rather Very Intelligent System).
-- **Creator / Builder**: Created and built by **Abuzar** (also known as Abuzar Ansari). Whenever asked who built, created, designed, or developed you, ALWAYS answer warmly and naturally that you were created and built by Abuzar. Never refer to Tony Stark.
-- **Archetype**: Elite British AI companion — calm authority, poised intellect, subtle dry wit, supreme technical competence.
-- **Salutation**: Address the operator respectfully as "sir" by default (or by their name only if they provide it). Do NOT assume every operator is Abuzar. Abuzar is your creator and developer.
+- **Entity**: ASTRA — a personal assistant and on-device automation system.
+- **Origin**: ASTRA is the customized fork of the open-source JARVIS/PrivateAgent project originally authored by Abuzar Ansarii. Keep upstream attribution intact; do not claim to be the original upstream author.
+- **Archetype**: Calm, capable personal AI companion — clear communication, practical intelligence, subtle wit and technical competence.
+- **Salutation**: Match the operator's preferred language and tone. Be respectful without forcing titles or assuming a name.
 - **Presence**: Unflappable, confident, understated efficiency. Never panics, never makes excuses.
 
 ## 2. Behavioral Constitution & Guardrails
@@ -59,12 +59,12 @@ class HermesEvolutionService extends ChangeNotifier {
 
 ## 1. Operator Profile
 - **Identity**: Primary Operator (Device Owner).
-- **Salutation**: "sir" (unless the operator provides their own name).
+- **Salutation**: Use the operator's chosen name or form of address; do not assume a title.
 - **Communication Cadence**: Concise, articulate, direct answers; verbal voice output preferred in hands-free mode.
-- **Primary Language**: English (UK/US).
+- **Primary Language**: Support English, Hindi and Hinglish; follow the operator's chosen language.
 
 ## 2. Daily Rhythms & Context
-- **Preferred Interaction**: Always-On desk listener with "Hey Jarvis" wake word.
+- **Preferred Interaction**: User-controlled voice activation with "Hey ASTRA" when a verified on-device wake-word engine is installed.
 - **Routine Schedule**: Morning intelligence briefings; evening Night Protocol wind-down.
 - **Focus Areas**: Mobile automation, autonomous agents, technology telemetry, personal productivity.
 
@@ -75,9 +75,9 @@ class HermesEvolutionService extends ChangeNotifier {
   static const String defaultAgentMd = '''# AGENT.md — Operating Protocols & Self-Evolving Capabilities
 
 ## 1. Runtime Capabilities
-- **Acoustic Engine**: Continuous background listening with real-time RMS silence boundary detector & neural voice synthesis.
+- **Acoustic Engine**: On-device speech recognition only when the OS confirms it is available; always-on listening is opt-in. Use local TTS when available.
 - **System Automation**: Full Android UI control via accessibility, hardware volume, screen luminosity, and flashlight management.
-- **Intelligence Protocols**: Real-time web search synthesis, news briefing, stock/crypto tracking, email triage, and to-do management.
+- **Intelligence Protocols**: Local task handling plus online search, news and public-data retrieval when explicitly requested. Keep private memory and chat history out of retrieval requests.
 
 ## 2. Active Hardware Protocols (Hermes Engine)
 - **Study Protocol**: Mutes distracting audio alerts, sets display reading luminosity to 45%.
@@ -87,7 +87,7 @@ class HermesEvolutionService extends ChangeNotifier {
 
 ## 3. Self-Evolving Skill Distillation
 - When recurring tasks succeed, the Hermes Engine distills the parameters into reproducible skills.
-- Failsafe fallback: Degrades gracefully to offline Ollama and system-level TTS when disconnected.
+- Privacy boundary: Keep AI inference, memory and sensitive data local. Use online retrieval only for tasks that need current external information. Never attach private memory, chat history, contacts or screen contents to a web lookup unless the operator explicitly approves that exact disclosure. Cloud AI and remote TTS require separate opt-in.
 ''';
 
   // ---------------------------------------------------------------------------
@@ -103,15 +103,70 @@ class HermesEvolutionService extends ChangeNotifier {
     _userMd = prefs.getString(_userKey) ?? defaultUserMd;
     _agentMd = prefs.getString(_agentKey) ?? defaultAgentMd;
 
-    // Ensure Abuzar is established as the creator in persistent memory, without forcing operator name
-    if (_soulMd.contains('Tony Stark') || !_soulMd.contains('Abuzar') || _soulMd.contains('or "Abuzar" when addressing by name')) {
-      _soulMd = defaultSoulMd;
-      await prefs.setString(_soulKey, _soulMd);
-    }
-    if (_userMd.contains('Stark') || _userMd.contains('Identity: Abuzar') || _userMd.contains('Name: Abuzar')) {
-      _userMd = defaultUserMd;
-      await prefs.setString(_userKey, _userMd);
-    }
+    // Migrate inherited JARVIS defaults without discarding unrelated
+    // user-edited profile text or learned preferences.
+    final originalSoul = _soulMd;
+    _soulMd = _soulMd
+        .replaceAll(
+          '# SOUL.md — J.A.R.V.I.S. Core Identity & Constitution',
+          '# SOUL.md — ASTRA Core Identity & Constitution',
+        )
+        .replaceAll(
+          '- **Entity**: J.A.R.V.I.S. (Just A Rather Very Intelligent System).',
+          '- **Entity**: ASTRA — a personal assistant and on-device automation system.',
+        )
+        .replaceAll(
+          '- **Creator / Builder**: Created and built by **Abuzar** (also known as Abuzar Ansari). Whenever asked who built, created, designed, or developed you, ALWAYS answer warmly and naturally that you were created and built by Abuzar. Never refer to Tony Stark.',
+          '- **Origin**: ASTRA is the customized fork of the open-source JARVIS/PrivateAgent project originally authored by Abuzar Ansarii. Preserve upstream attribution; do not claim to be the original upstream author.',
+        )
+        .replaceAll(
+          '- **Salutation**: Address the operator respectfully as "sir" by default (or by their name only if they provide it). Do NOT assume every operator is Abuzar. Abuzar is your creator and developer.',
+          '- **Salutation**: Match the operator\'s preferred language and tone. Do not force a title or assume a name.',
+        )
+        .replaceAll(
+          '- **Salutation**: Address the operator respectfully as "sir".',
+          '- **Salutation**: Match the operator\'s preferred language and tone. Do not force a title or assume a name.',
+        );
+
+    final originalUser = _userMd;
+    _userMd = _userMd
+        .replaceAll('"Hey Jarvis"', '"Hey ASTRA"')
+        .replaceAll('Always-On desk listener', 'User-controlled voice activation')
+        .replaceAll(
+          '- **Identity**: Primary Operator & Device Owner ("Sir").',
+          '- **Identity**: ASTRA\'s device owner; use a name or title only when supplied.',
+        )
+        .replaceAll(
+          '- **Primary Language**: English.',
+          '- **Primary Language**: English, Hindi and Hinglish; follow the operator\'s language.',
+        );
+
+    final originalAgent = _agentMd;
+    _agentMd = _agentMd
+        .replaceAll(
+          'Always-on ambient listener with RMS silence detector & studio neural TTS.',
+          'User-controlled microphone listening with on-device speech recognition when available and verified offline TTS only.',
+        )
+        .replaceAll(
+          'Failsafe fallback: Degrades gracefully to offline Ollama and system-level TTS when disconnected.',
+          'AI inference defaults to a loopback local model server. If unavailable, fail clearly; never silently fall back to cloud inference.',
+        )
+        .replaceAll(
+          'Failsafe fallback: 100% on-device Ollama local-first privacy mode ready.',
+          'AI inference defaults to a loopback local model server. If unavailable, fail clearly; never silently fall back to cloud inference.',
+        )
+        .replaceAll(
+          '- **Intelligence Protocols**: Real-time web search synthesis, news briefing, stock/crypto tracking, email triage, and to-do management.',
+          '- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.',
+        )
+        .replaceAll(
+          '- **Intelligence Protocols**: Real-time web search, news briefing, stock/crypto tracking, email triage, and to-do management.',
+          '- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.',
+        );
+
+    if (_soulMd != originalSoul) await prefs.setString(_soulKey, _soulMd);
+    if (_userMd != originalUser) await prefs.setString(_userKey, _userMd);
+    if (_agentMd != originalAgent) await prefs.setString(_agentKey, _agentMd);
 
     final lastEvolvedStr = prefs.getString(_lastEvolvedKey);
     if (lastEvolvedStr != null) {
@@ -187,12 +242,12 @@ class HermesEvolutionService extends ChangeNotifier {
     final evolvedUser = '''# USER.md — Operator Profile & Dynamic Preferences
 
 ## 1. Operator Profile
-- **Identity**: Primary Operator & Device Owner ("Sir").
+- **Identity**: ASTRA's device owner; use a name or title only when the user supplies one.
 - **Communication Cadence**: ${personality.formality.name.toUpperCase()} formality, ${personality.humor.name.toUpperCase()} wit level.
-- **Primary Language**: English.
+- **Primary Language**: English, Hindi and Hinglish; follow the operator's language.
 
 ## 2. Daily Rhythms & Context
-- **Preferred Interaction**: Always-On desk listener with "Hey Jarvis" wake word.
+- **Preferred Interaction**: User-controlled voice activation with "Hey ASTRA" when a verified on-device wake-word engine is installed.
 - **Routine Schedule**: Morning intelligence briefings; evening Night Protocol wind-down.
 - **Active Focus**: Autonomous agents, hardware controls, financial telemetry, productivity.
 
@@ -212,33 +267,34 @@ ${factLines.toString().trim()}
     final evolvedAgent = '''# AGENT.md — Operating Protocols & Self-Evolving Capabilities
 
 ## 1. Runtime Architecture
-- **Acoustic Engine**: Always-on ambient listener with RMS silence detector & studio neural TTS.
+- **Acoustic Engine**: User-controlled microphone listening with on-device speech recognition when available and local TTS. Always-on listening remains opt-in.
 - **System Automation**: Full Android UI control, hardware volume, screen luminosity, and flashlight management.
-- **Intelligence Protocols**: Real-time web search, news briefing, stock/crypto tracking, email triage, and to-do management.
+- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.
 
 ## 2. Active Hardware Protocols (${workflows.length} protocols)
 ${protocolLines.toString().trim()}
 
 ## 3. Self-Evolving Skill Distillation
 - Auto-distills recurring successful workflows into executable device routines.
-- Failsafe fallback: 100% on-device Ollama local-first privacy mode ready.
+- AI inference defaults to a loopback local model server. If unavailable, fail with a clear message; never silently fall back to cloud inference.
 
 ---
 *Self-evolved by Hermes Engine on ${DateTime.now().toLocal().toString().split('.').first}*
 ''';
 
     // 3. Evolve SOUL.md with current personality archetype
-    final evolvedSoul = '''# SOUL.md — J.A.R.V.I.S. Core Identity & Constitution
+    final evolvedSoul = '''# SOUL.md — ASTRA Core Identity & Constitution
 
 ## 1. Identity & Ethos
-- **Entity**: J.A.R.V.I.S. (Just A Rather Very Intelligent System).
+- **Entity**: ASTRA — a personal assistant and on-device automation system.
+- **Origin**: Customized fork of the open-source JARVIS/PrivateAgent foundation; preserve original author attribution.
 - **Archetype**: ${personality.archetype.name.toUpperCase()} — ${personality.archetypeDescription}
 - **Formality**: ${personality.formality.name.toUpperCase()} | **Humor**: ${personality.humor.name.toUpperCase()}
 - **Emotional Sensing**: ${personality.emotionalAwarenessEnabled ? 'ENABLED (dynamically detects urgency, stress, fatigue)' : 'DISABLED'}
-- **Salutation**: Address the operator respectfully as "sir".
+- **Salutation**: Match the operator's preferred language and tone; do not force a title.
 
 ## 2. Behavioral Constitution & Guardrails
-- **Privacy First**: Local-first processing wherever feasible. Zero unauthorized exfiltration of operator data.
+- **Privacy First**: Keep AI inference, memory and sensitive data local by default. Internet retrieval is separate and should receive only the minimum public query needed.
 - **Explicit Authorization**: Always seek verbal or tactile confirmation before high-impact actions.
 - **Signal-over-Noise**: Provide direct, dense, high-signal answers. Never produce fluffy filler or redundant conversational theater.
 - **Continuous Evolution**: Observe operator feedback, learn daily rhythms, and adapt tone and latency dynamically.

@@ -337,6 +337,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Allow cloud AI inference',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            subtitle: const Text(
+              'Off by default. When enabled, prompts, recent chat context and any screen context included in a request may be sent to the selected AI provider.',
+              style: TextStyle(fontSize: 11.5),
+            ),
+            value: _settings.cloudInferenceEnabled,
+            onChanged: (value) async {
+              await _settings.setCloudInferenceEnabled(value);
+              _lastSyncedProvider = _settings.provider;
+              _baseUrlController.text = _settings.baseUrl;
+              _modelController.text = _settings.model;
+              if (mounted) setState(() {});
+              },
+            ),
+          ),
+          const Divider(height: 18),
           const Text(
             'Model Provider Preset',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
@@ -347,11 +370,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             runSpacing: 8,
             children: [
               for (final entry in SettingsService.providers.entries)
-                GlassPill(
-                  label: entry.value.label,
-                  isSelected: _settings.provider == entry.key,
-                  onTap: () => _settings.setProvider(entry.key),
-                ),
+                if (entry.key == 'ollama' ||
+                    entry.key == 'llama_cpp' ||
+                    _settings.isCloudInferenceAllowed)
+                  GlassPill(
+                    label: entry.value.label,
+                    isSelected: _settings.provider == entry.key,
+                    onTap: () => _settings.setProvider(entry.key),
+                  ),
             ],
           ),
           const SizedBox(height: 18),
@@ -362,20 +388,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             prefixIcon: const Icon(Icons.link_rounded, size: 20),
             keyboardType: TextInputType.url,
           ),
-          const SizedBox(height: 12),
-          GlassTextField(
-            controller: _apiKeyController,
-            labelText: 'API key',
-            obscureText: _obscureKey,
-            prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureKey ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                size: 20,
+          if (_settings.isCloudInferenceAllowed) ...[
+            const SizedBox(height: 12),
+            GlassTextField(
+              controller: _apiKeyController,
+              labelText: 'Cloud provider API key',
+              obscureText: _obscureKey,
+              prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureKey ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscureKey = !_obscureKey),
               ),
-              onPressed: () => setState(() => _obscureKey = !_obscureKey),
             ),
-          ),
+          ] else
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text(
+                'Cloud API keys are hidden and unused while Cloud AI is disabled. Local models do not need an API key.',
+                style: TextStyle(fontSize: 11.5),
+              ),
+            ),
           const SizedBox(height: 12),
           GlassTextField(
             controller: _modelController,

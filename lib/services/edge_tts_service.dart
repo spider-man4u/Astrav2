@@ -505,6 +505,12 @@ class EdgeTtsService {
   /// Synthesizes [text] using Edge Neural TTS and writes the resulting MP3
   /// into the device cache directory. Returns the local [File].
   Future<File?> synthesize(String text, {String? voice}) async {
+    // Edge neural TTS is remote. Fail closed unless the user explicitly
+    // enables remote TTS in ASTRA's privacy settings.
+    if (!SettingsService.instance.remoteTtsEnabled) {
+      debugPrint('[EdgeTtsService] Remote TTS is disabled by privacy settings.');
+      return null;
+    }
     final selectedVoice = voice ?? SettingsService.instance.jarvisNeuralVoice;
 
     // Fast-path: Check disk cache

@@ -93,7 +93,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             ),
             const SizedBox(width: 10),
             const Text(
-              'J.A.R.V.I.S.',
+              'ASTRA',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
@@ -105,7 +105,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
         children: [
-          _sectionTitle('JARVIS Screen (HUD Visual Style)'),
+          _sectionTitle('ASTRA Screen (HUD Visual Style)'),
           _screenStyleCard(theme),
           const SizedBox(height: 20),
           _sectionTitle('Always-On Voice & Speech Synthesis'),
@@ -126,7 +126,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
           _sectionTitle('📁 Direct Storage & System Telemetry (No UI Taps)'),
           _directToolsCard(theme),
           const SizedBox(height: 20),
-          _sectionTitle('👁️ "Jarvis Eye" — Multimodal Camera Perception'),
+          _sectionTitle('👁️ "ASTRA Vision" — Multimodal Camera Perception'),
           _jarvisEyeCard(theme),
           const SizedBox(height: 20),
           _sectionTitle('🚀 Stark Superpowers & Cyber Suite'),
@@ -168,7 +168,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
       );
 
   // ---------------------------------------------------------------------------
-  // 0. JARVIS Screen (Visual Style) Card
+  // 0. ASTRA Screen (Visual Style) Card
   // ---------------------------------------------------------------------------
   Widget _screenStyleCard(ThemeData theme) {
     final currentStyle = _settings.jarvisScreenStyle;
@@ -203,12 +203,12 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'JARVIS Screen Mode',
+                        'ASTRA Screen Mode',
                         style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Choose your visual hologram display for JARVIS mode',
+                        'Choose your visual hologram display for ASTRA mode',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.onSurfaceVariant,
@@ -364,7 +364,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: const Text(
-                'Desk mode: listens silently in the background, ignores room chatter, and wakes on "Hey Jarvis"',
+                'Desk mode: listens silently in the background, ignores room chatter, and wakes on "Hey ASTRA"',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.jarvisAlwaysOn,
@@ -388,11 +388,12 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: const Text(
-                'Broadcast-grade natural human voice synthesis (auto-falls back offline)',
+                'Online neural voice sends response text to Microsoft Edge TTS. Enable this only when you accept that disclosure.',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.useNeuralVoice,
               onChanged: (val) async {
+                await _settings.setRemoteTtsEnabled(val);
                 await _settings.setUseNeuralVoice(val);
                 setState(() {});
               },
@@ -405,7 +406,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Select the studio human voice for Jarvis spoken responses.',
+              'Select the online neural voice used for ASTRA responses.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -493,7 +494,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
               segments: const [
                 ButtonSegment(
                   value: PersonalityArchetype.jarvis,
-                  label: Text('JARVIS', style: TextStyle(fontSize: 11)),
+                  label: Text('ASTRA', style: TextStyle(fontSize: 11)),
                   icon: Icon(Icons.shield_outlined, size: 16),
                 ),
                 ButtonSegment(
@@ -1103,7 +1104,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 3b. "Jarvis Eye" Multimodal Camera & Optical Perception Card
+  // 3b. "ASTRA Vision" Multimodal Camera & Optical Perception Card
   // ---------------------------------------------------------------------------
   Widget _jarvisEyeCard(ThemeData theme) {
     final vision = VisionPerceptionService.instance;
@@ -1117,7 +1118,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text(
-                'Jarvis Eye Optical Perception',
+                'ASTRA Vision Optical Perception',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
@@ -1143,7 +1144,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                     : const Icon(Icons.remove_red_eye_outlined, size: 18),
                 label: Text(vision.isInspecting
                     ? 'Scanning Optical Target...'
-                    : 'Test Jarvis Eye Snapshot'),
+                    : 'Test ASTRA Vision Snapshot'),
                 onPressed: vision.isInspecting
                     ? null
                     : () async {
@@ -1379,7 +1380,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.radar, color: Color(0xFF00E676)),
               title: const Text('Airspace & Satellite Radar'),
-              subtitle: const Text('"Jarvis, what\'s flying above me?" — Live ADS-B flights and ISS orbital passes'),
+              subtitle: const Text('"ASTRA, what\'s flying above me?" — Live ADS-B flights and ISS orbital passes'),
               trailing: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00E676).withValues(alpha: 0.15),
@@ -1578,7 +1579,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  'No macros recorded yet. Tap "Start Recording" or say "Jarvis, record macro <name>" to demonstrate an autonomous skill.',
+                  'No macros recorded yet. Tap "Start Recording" or say "ASTRA, record macro <name>" to demonstrate an autonomous skill.',
                   style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
                 ),
               )
@@ -2000,7 +2001,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: const Text(
-                'Jarvis speaks aloud to prompt you about night mode, study sessions, upcoming meetings, and remaining to-dos',
+                'ASTRA speaks aloud to prompt you about night mode, study sessions, upcoming meetings, and remaining to-dos',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.jarvisAutoSpeakEnabled,
@@ -2018,7 +2019,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 subtitle: const Text(
-                  'Jarvis opens an active listening window after asking a question so you can reply "Yes" or "No" without touching the device',
+                  'ASTRA opens an active listening window after asking a question so you can reply "Yes" or "No" without touching the device',
                   style: TextStyle(fontSize: 12),
                 ),
                 value: _settings.proactiveVoiceConfirmationEnabled,
@@ -2146,7 +2147,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
               ),
               const SizedBox(height: 4),
               const Text(
-                'Tap any prompt to test Jarvis speaking aloud and awaiting your hands-free voice confirmation ("Yes" / "No"):',
+                'Tap any prompt to test ASTRA speaking aloud and awaiting your hands-free voice confirmation ("Yes" / "No"):',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 10),
@@ -2161,7 +2162,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                       ProactiveAgentService.instance.testProactivePrompt('night');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Testing Night Mode auto-speak... Say "Yes" or "No" to Jarvis.'),
+                          content: Text('Testing Night Mode auto-speak... Say "Yes" or "No" to ASTRA.'),
                           duration: Duration(seconds: 3),
                         ),
                       );
@@ -2174,7 +2175,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                       ProactiveAgentService.instance.testProactivePrompt('study');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Testing Study Protocol prompt... Say "Yes" or "No" to Jarvis.'),
+                          content: Text('Testing Study Protocol prompt... Say "Yes" or "No" to ASTRA.'),
                           duration: Duration(seconds: 3),
                         ),
                       );
@@ -2187,7 +2188,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                       ProactiveAgentService.instance.testProactivePrompt('meeting');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Testing Meeting Alert... Say "Yes" or "No" to Jarvis.'),
+                          content: Text('Testing Meeting Alert... Say "Yes" or "No" to ASTRA.'),
                           duration: Duration(seconds: 3),
                         ),
                       );
@@ -2200,7 +2201,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                       ProactiveAgentService.instance.testProactivePrompt('todo');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Testing Tasks Review... Say "Yes" or "No" to Jarvis.'),
+                          content: Text('Testing Tasks Review... Say "Yes" or "No" to ASTRA.'),
                           duration: Duration(seconds: 3),
                         ),
                       );
@@ -2230,11 +2231,11 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text(
-                'Local-First Privacy Mode',
+                'ASTRA Local AI Only',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
-                'Forces 100% on-device AI via Ollama (127.0.0.1:11434) & offline TTS — zero data sent outside your device',
+                'On keeps AI inference on the local endpoint. Turning this off alone does not enable cloud AI; use the separate Cloud AI consent switch. Web lookups can still use the internet.',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.localFirstPrivacyMode,

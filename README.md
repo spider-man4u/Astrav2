@@ -1,9 +1,9 @@
 <div align="center">
 
-# ⚡ J.A.R.V.I.S. (PrivateAgent)
+# ✦ ASTRA — Offline-First Personal Assistant
 
-### **Autonomous, Self-Evolving On-Device AI Assistant & Android UI Automation Agent**
-*Architected and Engineered with Precision by **Abuzar***
+### **On-device AI companion & Android automation framework**
+*ASTRA fork of JARVIS / PrivateAgent — original foundation by **Abuzar Ansarii***
 
 ---
 
@@ -12,13 +12,13 @@
 [![Android](https://img.shields.io/badge/Android-API%2026%2B%20(8.0--15)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Release](https://img.shields.io/badge/Release-v1.1.0-blue?style=for-the-badge&logo=github)](https://github.com/AbuZar-Ansarii/Jarvis/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local--First-00E5FF?style=for-the-badge&logo=shield&logoColor=black)](https://ollama.com)
+[![Privacy](https://img.shields.io/badge/Privacy-Offline--First-00E5FF?style=for-the-badge&logo=shield&logoColor=black)](https://ollama.com)
 [![Hermes](https://img.shields.io/badge/Hermes-Self--Evolving%20Engine-BA68C8?style=for-the-badge&logo=openai&logoColor=white)](https://nousresearch.com)
 [![UI](https://img.shields.io/badge/Design-Liquid%20Glass%20HUD-6366F1?style=for-the-badge&logo=material-design&logoColor=white)](https://flutter.dev)
-[![TTS](https://img.shields.io/badge/Audio-Microsoft%20Studio%20Neural-FFB300?style=for-the-badge&logo=microsoftexcel&logoColor=black)](https://azure.microsoft.com)
+[![TTS](https://img.shields.io/badge/Audio-Offline%20Voice%20First-FFB300?style=for-the-badge&logo=android&logoColor=black)](https://developer.android.com)
 
 <p align="center">
-  <b><i>"Your keys. Your data. Your device. Nothing leaves your phone except the LLM calls you authorize."</i></b>
+  <b><i>"Private by default. Online when a task genuinely needs it."</i></b>
 </p>
 
 </div>
@@ -27,19 +27,23 @@
 
 ## 🌟 System Overview
 
-**J.A.R.V.I.S.** (PrivateAgent) is an autonomous, on-device AI assistant, system automation framework, and cybernetic operating HUD for Android, architected and built by **Abuzar**. 
+**ASTRA** is an offline-first customization of the open-source JARVIS / PrivateAgent Android assistant originally authored by **Abuzar Ansarii**. ASTRA keeps core AI inference on the device by default while allowing separate online retrieval for current information and updates. 
 
-Unlike conventional voice assistants that merely return web searches or canned voice responses, J.A.R.V.I.S. acts as a true autonomous operator on your smartphone. By coupling on-device accessibility inspection, native sensor hardware access, multimodal machine vision, and OpenAI-compatible LLM backends (cloud or 100% offline via Ollama), J.A.R.V.I.S. can:
+The upstream JARVIS foundation includes Android accessibility automation, sensor integrations, vision workflows and OpenAI-compatible model providers. ASTRA's current foundation routes AI requests to a loopback local endpoint by default. **A local inference runtime and model are not bundled yet**; install and start Ollama or a llama.cpp server until the embedded Android runtime is delivered. Cloud inference and remote neural TTS remain separate, explicit opt-ins.
 
-- **Operate Any Application Hands-Free**: Read screen hierarchies, synthesize user intentions, and execute multi-step touch interactions (tap, type, scroll, swipe) autonomously.
+- **Operate Any Application**: With the accessibility service enabled, ASTRA can read screen hierarchies and execute requested touch interactions (tap, type, scroll, swipe). Always-on listening is off by default.
 - **Project Dual Cinematic 3D Holograms**: Render an interactive gyroscopic Arc Reactor consciousness core or a translucent 3D Iron Man hologram suit bust with dynamic audio-reactive aura colors.
 - **Sense Your Physical Environment**: Detect mid-air hand gestures using optical proximity hardware, monitor room movement using accelerometer watchdog sentries, and calculate aircraft overhead via ADS-B telemetry.
 - **Evolve and Self-Improve (Hermes Engine)**: Distill repetitive app interactions into executable macro skills and persist learned operator preferences across `SOUL.md`, `USER.md`, and `AGENT.md` context files.
-- **Guarantee Complete Privacy**: Built with a strict **Local-First Privacy Architecture** with zero embedded trackers, zero telemetry analytics, and complete compatibility with fully offline, on-device Ollama instances.
+- **Privacy by default**: Cloud AI inference and remote neural TTS are blocked unless explicitly enabled. Speech recognition requires an Android on-device recognizer; speech output selects only installed voices explicitly reported as offline. Online retrieval still needs a full service-by-service data-flow audit. Persistent memory and credentials are still stored in SharedPreferences without app-level encryption; see [the privacy audit](docs/PRIVACY_AUDIT.md).
 
 ---
 
-## 🚀 What's New in v1.1.0 — The Autonomous Triad
+## ✦ ASTRA foundation status
+
+The current working branch defaults to local inference, blocks cloud AI until explicit consent, gates remote Edge TTS, and refuses network-backed Android speech recognition. It also adds a local llama.cpp server preset. These controls do **not** yet make the app fully standalone or release-ready: the local runtime/model, encrypted memory, a bundled offline speech engine, central online-tool policy and full device/network tests remain future work. See [the architecture](docs/ASTRA_OFFLINE_FIRST.md), [privacy audit](docs/PRIVACY_AUDIT.md) and [roadmap](docs/ROADMAP.md).
+
+## 🚀 What's New in upstream v1.1.0 — The Autonomous Triad
 
 Release **v1.1.0** introduces **The Autonomous Triad** upgrade:
 
@@ -78,7 +82,7 @@ flowchart TD
         AiService["AiService & Intent Router"]
         TaskExecutor["TaskExecutor\n(Observe-Think-Act Engine)"]
         Hermes["Hermes Evolution Service\n(SOUL.md | USER.md | AGENT.md)"]
-        VoiceEngine["VoiceService & Edge Neural TTS\n(en-GB-RyanNeural Studio Voice)"]
+        VoiceEngine["VoiceService\n(verified offline Android TTS; remote Edge TTS opt-in)"]
     end
 
     subgraph PlatformBridge ["Native Android Bridge (Kotlin Platform Channels)"]

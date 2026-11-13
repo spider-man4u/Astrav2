@@ -89,69 +89,100 @@ class VoiceService {
       final available =
           await _nativeSpeechChannel.invokeMethod<bool>('isAvailable') ?? true;
       _speechReady = available;
-    } catch (_) {
-      _speechReady = true;
+    } catch (e) {
+      debugPrint('[VoiceService] On-device speech availability check failed: $e');
+      _speechReady = false;
     }
     return _speechReady;
   }
 
   Future<void> initTts({String? voiceProfile}) async {
     final profile = voiceProfile ?? SettingsService.instance.jarvisVoice;
-    try {
-      switch (profile) {
-        case 'friday':
-          await _tts.setLanguage('en-IE');
-          await _tts.setPitch(1.05);
-          await _tts.setSpeechRate(0.52);
-          break;
-        case 'stark':
-          await _tts.setLanguage('en-US');
-          await _tts.setPitch(0.95);
-          await _tts.setSpeechRate(0.55);
-          break;
-        case 'kip':
-          await _tts.setLanguage('en-GB');
-          await _tts.setPitch(0.78);
-          await _tts.setSpeechRate(0.48);
-          break;
-        case 'cortana':
-          await _tts.setLanguage('en-US');
-          await _tts.setPitch(1.10);
-          await _tts.setSpeechRate(0.52);
-          break;
-        case 'paul':
-        default:
-          await _tts.setLanguage('en-GB');
-          await _tts.setPitch(0.86);
-          await _tts.setSpeechRate(0.48);
+    _ttsReady = false;
 
-          try {
-            final dynamic voices = await _tts.getVoices;
-            if (voices is List && voices.isNotEmpty) {
-              for (final v in voices) {
-                if (v is Map) {
-                  final name = (v['name'] ?? '').toString().toLowerCase();
-                  final locale = (v['locale'] ?? '').toString().toLowerCase();
-                  if (locale.contains('en-gb') || locale.contains('en_gb')) {
-                    if (name.contains('gbd') ||
-                        name.contains('gbb') ||
-                        name.contains('male') ||
-                        name.contains('-r-') ||
-                        name.contains('language') && name.contains('b')) {
-                      await _tts.setVoice({
-                        'name': v['name'].toString(),
-                        'locale': v['locale'].toString(),
-                      });
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-          } catch (_) {}
-          break;
+    String locale;
+    double pitch;
+    double speechRate;
+    switch (profile) {
+      case 'friday':
+        locale = 'en-IE';
+        pitch = 1.05;
+        speechRate = 0.52;
+        break;
+      case 'stark':
+        locale = 'en-US';
+        pitch = 0.95;
+        speechRate = 0.55;
+        break;
+      case 'kip':
+        locale = 'en-GB';
+        pitch = 0.78;
+        speechRate = 0.48;
+        break;
+      case 'cortana':
+        locale = 'en-US';
+        pitch = 1.10;
+        speechRate = 0.52;
+        break;
+      case 'paul':
+      default:
+        locale = 'en-GB';
+        pitch = 0.86;
+        speechRate = 0.48;
+        break;
+    }
+
+    try {
+      // Android TTS exposes whether each installed voice requires a network.
+      // ASTRA deliberately selects only voices explicitly marked offline.
+      final dynamic voicesResult = await _tts.getVoices;
+      if (voicesResult is! List) {
+        throw StateError('The Android TTS engine did not report its voices.');
       }
 
+      final offlineVoices = voicesResult
+          .whereType<Map>()
+          .where((voice) => voice['network_required'] == false)
+          .toList(growable: false);
+
+      if (offlineVoices.isEmpty) {
+        throw StateError(
+          'No installed offline TTS voice is available. Install an offline '
+          'voice in Android Text-to-speech settings or use text output.',
+        );
+      }
+
+      String normalizeLocale(dynamic value) =>
+          value.toString().replaceAll('_', '-').toLowerCase();
+
+      final normalizedTarget = locale.toLowerCase();
+      final exactMatches = offlineVoices
+          .where((voice) =>
+              normalizeLocale(voice['locale']) == normalizedTarget)
+          .toList(growable: false);
+      final englishMatches = offlineVoices
+          .where((voice) =>
+              normalizeLocale(voice['locale']).startsWith('en-'))
+          .toList(growable: false);
+      final candidates = exactMatches.isNotEmpty
+          ? exactMatches
+          : (englishMatches.isNotEmpty ? englishMatches : offlineVoices);
+
+      final preferred = candidates.where((voice) {
+        final name = (voice['name'] ?? '').toString().toLowerCase();
+        return name.contains('male') ||
+            name.contains('gbd') ||
+            name.contains('gbb') ||
+            name.contains('-r-');
+      }).toList(growable: false);
+      final selected = preferred.isNotEmpty ? preferred.first : candidates.first;
+
+      await _tts.setVoice({
+        'name': selected['name'].toString(),
+        'locale': selected['locale'].toString(),
+      });
+      await _tts.setPitch(pitch);
+      await _tts.setSpeechRate(speechRate);
       await _tts.awaitSpeakCompletion(true);
 
       _tts.setStartHandler(() {
@@ -177,13 +208,10 @@ class VoiceService {
       });
 
       _ttsReady = true;
-    } catch (_) {
-      try {
-        await _tts.setLanguage('en-US');
-        _ttsReady = true;
-      } catch (_) {
-        _ttsReady = false;
-      }
+    } catch (e) {
+      // Fail closed: never fall back to an unknown/default network voice.
+      debugPrint('[VoiceService] Offline TTS unavailable: $e');
+      _ttsReady = false;
     }
   }
 
@@ -248,10 +276,10 @@ class VoiceService {
   /// instead of spelling out letters like "J dot A dot R dot V dot I dot S".
   String sanitizeForSpeech(String text) {
     return text
-        .replaceAll(RegExp(r'J\.A\.R\.V\.I\.S\.?', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'\bJ\.A\.R\.V\.I\.S\b', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'J\s*\.\s*A\s*\.\s*R\s*\.\s*V\s*\.\s*I\s*\.\s*S\.?', caseSensitive: false), 'Jarvis')
-        .replaceAll(RegExp(r'\bJARVIS\b'), 'Jarvis')
+        .replaceAll(RegExp(r'J\.A\.R\.V\.I\.S\.?', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'\bJ\.A\.R\.V\.I\.S\b', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'J\s*\.\s*A\s*\.\s*R\s*\.\s*V\s*\.\s*I\s*\.\s*S\.?', caseSensitive: false), 'Astra')
+        .replaceAll(RegExp(r'\bJARVIS\b'), 'Astra')
         .replaceAll('*', '')
         .replaceAll('#', '')
         .replaceAll('`', '')
@@ -274,7 +302,8 @@ class VoiceService {
 
     try {
       // 1. Try Ultra-Realistic Studio Neural Voice if enabled
-      if (SettingsService.instance.useNeuralVoice) {
+      if (SettingsService.instance.remoteTtsEnabled &&
+          SettingsService.instance.useNeuralVoice) {
         try {
           final played = await EdgeTtsService.instance.speak(clean);
           if (played) {
@@ -285,7 +314,7 @@ class VoiceService {
         }
       }
 
-      // 2. Fall back to local FlutterTts (offline safe)
+      // 2. Use FlutterTts only after an offline voice has been verified
       await initTts();
       if (!_ttsReady) {
         return;

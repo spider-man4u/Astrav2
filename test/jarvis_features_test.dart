@@ -86,9 +86,9 @@ void main() {
       await personality.setFormality(FormalityLevel.formal);
       await personality.setHumor(HumorLevel.subtle);
 
-      final jarvisPrompt = personality.buildPersonaPrompt('Please help me quickly');
-      expect(jarvisPrompt, contains('ARCHETYPE: You are Jarvis'));
-      expect(jarvisPrompt, contains('FORMALITY'));
+      final astraPrompt = personality.buildPersonaPrompt('Please help me quickly');
+      expect(astraPrompt, contains('ARCHETYPE: You are ASTRA'));
+      expect(astraPrompt, contains('FORMALITY'));
 
       // Emotional state detection
       final urgentEmotion = personality.detectEmotion('Please hurry, this is an emergency ASAP!');
@@ -102,6 +102,24 @@ void main() {
 
       final happyEmotion = personality.detectEmotion('This is wonderful, great job!');
       expect(happyEmotion, DetectedEmotion.happy);
+    });
+  });
+
+  group('Feature 2b: ASTRA Wake Word', () {
+    test('Extracts ASTRA wake phrases and preserves legacy Jarvis phrases', () {
+      expect(
+        JarvisService.extractWakeCommand('Hey ASTRA, what is the weather?'),
+        'what is the weather?',
+      );
+      expect(JarvisService.extractWakeCommand('ASTRA'), '');
+      expect(
+        JarvisService.extractWakeCommand('Hello Astra, open settings'),
+        'open settings',
+      );
+      expect(
+        JarvisService.extractWakeCommand('Hey Jarvis, open YouTube'),
+        'open YouTube',
+      );
     });
   });
 

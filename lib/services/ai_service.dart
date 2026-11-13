@@ -19,7 +19,7 @@ class AiException implements Exception {
       statusCode == null ? message : 'HTTP $statusCode: $message';
 }
 
-/// Structured intent classification result for JARVIS mode.
+/// Structured intent classification result for ASTRA mode.
 enum JarvisIntentType {
   chat,
   action,
@@ -73,7 +73,7 @@ class JarvisIntent {
   factory JarvisIntent.fallback(String command) {
     final lower = command.toLowerCase().trim();
 
-    // 0. Jarvis Eye Optical Vision check
+    // 0. ASTRA Vision Optical Vision check
     if (lower.contains('look at this') ||
         lower.contains('what is this') ||
         lower.contains('scan this') ||
@@ -82,7 +82,7 @@ class JarvisIntent {
         lower.contains('what do you see')) {
       return JarvisIntent(
         type: JarvisIntentType.vision,
-        spoken: 'Jarvis Eye optical sensors active, sir.',
+        spoken: 'ASTRA Vision optical sensors active, sir.',
         toolArg: command,
       );
     }
@@ -624,12 +624,24 @@ class AiService {
 
   final http.Client _client = http.Client();
 
-  /// True for local backends (Ollama etc.) that accept any/empty API key.
+  /// Detect the actual target host. A privacy-mode flag must never make a
+  /// remote URL look local.
   bool get _isLocalBackend {
-    final settings = SettingsService.instance;
-    if (settings.provider == 'ollama' || settings.localFirstPrivacyMode) return true;
-    final host = Uri.tryParse(settings.baseUrl)?.host ?? '';
-    return host == 'localhost' || host == '127.0.0.1' || host == '[::1]';
+    final host = (Uri.tryParse(SettingsService.instance.baseUrl)?.host ?? '')
+        .toLowerCase();
+    return host == 'localhost' ||
+        host == '127.0.0.1' ||
+        host == '::1' ||
+        host == '[::1]';
+  }
+
+  void _enforceInferencePrivacy(SettingsService settings) {
+    if (!_isLocalBackend && !settings.isCloudInferenceAllowed) {
+      throw const AiException(
+        'ASTRA blocked this cloud AI request. Enable Cloud AI explicitly in '
+        'Settings to send prompts and conversation context to an online provider.',
+      );
+    }
   }
 
   /// The system prompt that turns a chat model into a UI automation agent.
@@ -639,7 +651,7 @@ class AiService {
     return '''
 $hermes
 
-You are PrivateAgent, an autonomous Android UI automation agent.
+You are ASTRA, an autonomous Android UI automation agent.
 ${memory.isNotEmpty ? '$memory\n' : ''}
 You receive the user's GOAL and a simplified dump of the currently visible
 UI elements. Each line looks like:
@@ -693,9 +705,9 @@ $hermes
 $persona
 
 ${memory.isNotEmpty ? '$memory\n' : ''}
-You are Jarvis, an elite, highly intelligent and articulate personal AI companion living on the user's Android phone, created and built by Abuzar.
+You are ASTRA, an intelligent, articulate personal AI companion running primarily on the user's Android device.
 Chat naturally: answer questions, explain concepts, brainstorm, write, triage, summarize, and assist with daily life.
-Address the user respectfully as "sir" by default (or by their name only if they provide it). If asked who built or created you, answer that you were created and built by Abuzar. Never assume the current user is Abuzar.
+You are the ASTRA customization of the open-source JARVIS/PrivateAgent foundation. Preserve upstream attribution in project documentation; do not claim to be the original upstream author.
 Markdown formatting is supported.
 
 HUMAN CONVERSATIONAL RULES & TONE SHIFTING:
@@ -708,7 +720,7 @@ HUMAN CONVERSATIONAL RULES & TONE SHIFTING:
 - Vary your openings and closings naturally. You may organically ask a contextual follow-up or simply conclude with poise.
 
 You cannot directly tap the screen in this mode. If the user asks you to perform physical device actions
-(tapping, typing in other apps), inform them they can switch to Agent or JARVIS mode using the mode switcher.
+(tapping, typing in other apps), inform them they can switch to Agent or ASTRA mode using the mode switcher.
 ''';
   }
 
@@ -807,6 +819,7 @@ You cannot directly tap the screen in this mode. If the user asks you to perform
       },
     ];
 
+    _enforceInferencePrivacy(settings);
     if (settings.apiKey.isEmpty && !_isLocalBackend) {
       throw const AiException(
         'No API key configured. Open Settings and add one first.',
@@ -898,7 +911,7 @@ You cannot directly tap the screen in this mode. If the user asks you to perform
     }
   }
 
-  /// Evaluates and classifies a user command in JARVIS mode.
+  /// Evaluates and classifies a user command in ASTRA mode.
   Future<JarvisIntent> interpretJarvisCommand({
     required String speech,
     List<Map<String, String>> history = const [],
@@ -923,7 +936,7 @@ AVAILABLE PROTOCOLS & TOOLS:
 - "calendar": Calendar schedule, meetings, and reminders (schedule, reschedule, reminders).
 - "email": Email triage, summarization, and drafting replies.
 - "message": Message drafting and sending for WhatsApp, SMS, and Email.
-- "vision": Jarvis Eye optical perception (inspect physical objects, documents, circuit boards, receipts, error codes).
+- "vision": ASTRA Vision optical perception (inspect physical objects, documents, circuit boards, receipts, error codes).
 - "multistep": Multi-step agentic task planning ("plan my trip and book it").
 - "smart_home": Home Assistant / IoT smart devices (turn on/off/dim lights, triggers scenes).
 - "commute": Real-time traffic warnings, travel duration, departure time alerts.
@@ -1140,14 +1153,14 @@ Respond with ONLY a single JSON object:
   }) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent personal AI companion created and built by Abuzar.
+You are ASTRA, a capable personal AI companion running locally by default. Preserve upstream attribution; do not claim to be the original upstream author.
 The user asked: "$userQuestion"
 Retrieved real-time information:
 "$toolResult"
 
 HUMAN SPOKEN DELIVERY GUIDELINES:
 1. NATURAL HUMAN CONVERSATION (NOT A DUMB ROBOT):
-   - Deliver the answer like a trusted human advisor and loyal British companion talking directly to the user.
+   - Deliver the answer like a trusted, knowledgeable companion. Match the user's language and preferred formality; do not force a title.
    - NEVER repeat formulaic openers like "Here is what I found for you, sir:" or "Here are today's headlines, sir:". VARY your entry phrasing naturally.
    - BAN AI CLICHES: Never say "According to the retrieved information", "As an AI", "Certainly, I can help you with that", or "At your service sir, what would you like me to do".
 2. DYNAMIC TONE SHIFTING:
@@ -1157,8 +1170,8 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
 3. CONVERSATIONAL CLOSINGS:
    - Vary how you conclude. You can naturally suggest a thoughtful contextual next step (e.g. "Curious if you would like me to unpack that second headline?", "Shall we explore how neural networks tie into that, sir?", "Let me know if you would like more detail."), or let a crisp answer stand on its own.
 4. VOICE SYNTHESIS RULES:
-   - Address the user respectfully as "sir" (or by their name if introduced). Creator is always Abuzar.
-   - Always write your name as "Jarvis" (never use dots or spell it out).
+   - Use a supplied name or form of address when known; otherwise remain neutral. Preserve upstream author attribution without claiming that author is your personal creator.
+   - Always write your name as "ASTRA".
    - Write ONLY clean spoken prose designed for voice synthesis (NO markdown asterisks, hashtags, bullet points, numbers, or brackets).
 ''';
 
@@ -1177,7 +1190,7 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
   }
 
   /// Multimodal vision completion using standard OpenAI / OpenRouter / Ollama format.
-  /// Used by "Jarvis Eye" to inspect physical objects, circuits, documents, and receipts.
+  /// Used by "ASTRA Vision" to inspect physical objects, circuits, documents, and receipts.
   Future<String> completeMultimodal({
     required String prompt,
     required String base64Image,
@@ -1185,11 +1198,11 @@ HUMAN SPOKEN DELIVERY GUIDELINES:
   }) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent AI assistant created and built by Abuzar, with advanced optical perception ("Jarvis Eye").
+You are ASTRA, a capable personal AI assistant with advanced on-device optical perception.
 Analyze the provided visual image with exceptional detail and precision.
 1. Identify physical objects, devices, circuits, documents, receipts, warning lights, text, or errors.
 2. Formulate your findings into 2 to 3 articulate, courteous sentences in the style of a British butler and brilliant tech advisor.
-3. Address the user politely as "sir" (or by their name if introduced). Never assume every user is Abuzar; Abuzar is your creator.
+3. Match the user's preferred language and form of address. Do not claim the upstream author as the creator of this ASTRA customization.
 4. Never output markdown asterisks or bullet points. Provide clean spoken English ready for voice synthesis.
 ''';
 
@@ -1224,10 +1237,10 @@ Analyze the provided visual image with exceptional detail and precision.
   Future<String> summarizeScreenContent(String screenText) async {
     final settings = SettingsService.instance;
     final systemPrompt = '''
-You are Jarvis, an elite, highly intelligent AI assistant created and built by Abuzar.
+You are ASTRA, a capable personal AI assistant. Preserve upstream attribution; do not claim to be the original upstream author.
 The user is viewing an article or screen on their device and requested an executive briefing.
 1. Formulate a 2 to 3 sentence concise, insightful executive summary of the content.
-2. Address the user politely as "sir" (or by their name if introduced). Never assume the user is Abuzar.
+2. Match the user's preferred language and form of address; do not assume a name or title.
 3. Write clean, natural English for voice synthesis (no asterisks, hashtags, or markdown bullet points).
 ''';
 
@@ -1235,7 +1248,7 @@ The user is viewing an article or screen on their device and requested an execut
       {'role': 'system', 'content': systemPrompt},
       {
         'role': 'user',
-        'content': 'Please provide an executive summary of this screen content, sir:\n\n$screenText',
+        'content': 'Please provide an executive summary of this screen content:\n\n$screenText',
       },
     ];
 
@@ -1261,6 +1274,7 @@ The user is viewing an article or screen on their device and requested an execut
     List<Map<String, dynamic>> messages,
     SettingsService settings,
   ) async {
+    _enforceInferencePrivacy(settings);
     if (settings.apiKey.isEmpty && !_isLocalBackend) {
       throw const AiException(
         'No API key configured. Open Settings and add one first.',
