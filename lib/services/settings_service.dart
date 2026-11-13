@@ -75,6 +75,11 @@ class SettingsService extends ChangeNotifier {
       baseUrl: 'http://127.0.0.1:11434/v1',
       model: 'llama3.2',
     ),
+    'llama_cpp': (
+      label: 'llama.cpp (local)',
+      baseUrl: 'http://127.0.0.1:8080/v1',
+      model: 'local-model',
+    ),
     'custom': (label: 'Custom (OpenAI-compatible)', baseUrl: '', model: ''),
   };
 
@@ -87,13 +92,27 @@ class SettingsService extends ChangeNotifier {
   bool get isCloudInferenceAllowed =>
       cloudInferenceEnabled && !localFirstPrivacyMode;
 
-  String get provider => isCloudInferenceAllowed
-      ? (_prefs?.getString('ai_provider') ?? 'ollama')
-      : 'ollama';
+  String get provider {
+    final stored = _prefs?.getString('ai_provider') ?? 'ollama';
+    // Both local runtimes remain selectable without cloud consent.
+    if (stored == 'ollama' || stored == 'llama_cpp') return stored;
+    return isCloudInferenceAllowed ? stored : 'ollama';
+  }
+
+  bool _isLoopbackEndpoint(String? value) {
+    final uri = Uri.tryParse(value ?? '');
+    final host = (uri?.host ?? '').toLowerCase();
+    return uri != null &&
+        (host == 'localhost' ||
+            host == '127.0.0.1' ||
+            host == '::1' ||
+            host == '[::1]');
+  }
 
   Future<void> setProvider(String value) async {
     // Never let a provider chip silently switch private prompts to a cloud API.
-    if (value != 'ollama' && !isCloudInferenceAllowed) return;
+    final isLocalProvider = value == 'ollama' || value == 'llama_cpp';
+    if (!isLocalProvider && !isCloudInferenceAllowed) return;
     await _prefs?.setString('ai_provider', value);
     final preset = providers[value];
     if (preset != null && preset.baseUrl.isNotEmpty) {
@@ -103,13 +122,23 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get baseUrl => !isCloudInferenceAllowed
-      ? providers['ollama']!.baseUrl
-      : (_prefs?.getString('ai_base_url') ??
+  String get baseUrl {
+    final configured = _prefs?.getString('ai_base_url');
+    if (isCloudInferenceAllowed) {
+      return configured ??
           providers[provider]?.baseUrl ??
-          providers['ollama']!.baseUrl);
+          providers['ollama']!.baseUrl;
+    }
+    // In local-only mode accept loopback endpoints only (Ollama or llama.cpp).
+    return _isLoopbackEndpoint(configured)
+        ? configured!
+        : (providers[provider]?.baseUrl ?? providers['ollama']!.baseUrl);
+  }
+
   Future<void> setBaseUrl(String value) async {
-    await _prefs?.setString('ai_base_url', value.trim());
+    final clean = value.trim();
+    if (!isCloudInferenceAllowed && !_isLoopbackEndpoint(clean)) return;
+    await _prefs?.setString('ai_base_url', clean);
     notifyListeners();
   }
 
@@ -119,11 +148,15 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get model => !isCloudInferenceAllowed
-      ? providers['ollama']!.model
-      : (_prefs?.getString('ai_model') ??
+  String get model {
+    final configuredEndpoint = _prefs?.getString('ai_base_url');
+    if (isCloudInferenceAllowed || _isLoopbackEndpoint(configuredEndpoint)) {
+      return _prefs?.getString('ai_model') ??
           providers[provider]?.model ??
-          providers['ollama']!.model);
+          providers['ollama']!.model;
+    }
+    return providers[provider]?.model ?? providers['ollama']!.model;
+  }
   Future<void> setModel(String value) async {
     await _prefs?.setString('ai_model', value.trim());
     notifyListeners();
