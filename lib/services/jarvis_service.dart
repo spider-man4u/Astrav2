@@ -68,7 +68,7 @@ enum JarvisPhase {
 }
 
 /// Central controller for JARVIS Mode:
-/// - Always-On hands-free voice assistant with Wake Words ("Hey Jarvis", "Hello Jarvis", "Jarvis")
+/// - Always-On hands-free voice assistant with Wake Words ("Hey ASTRA", "Hello Jarvis", "Jarvis")
 /// - Ignores ambient room chatter in standby until wake word is recognized
 /// - Active conversational continuation window for hands-free follow-up queries
 /// - Hermes Self-Evolving Workflow Engine integration (Study, Night, Work, Cinema)
@@ -93,7 +93,7 @@ class JarvisService extends ChangeNotifier {
   String _lastUserSpeech = '';
   String get lastUserSpeech => _lastUserSpeech;
 
-  String _lastJarvisSpeech = 'At your service, sir. Say "Hey Jarvis" anytime.';
+  String _lastJarvisSpeech = 'At your service, sir. Say "Hey ASTRA" anytime.';
   String get lastJarvisSpeech => _lastJarvisSpeech;
 
   String _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
@@ -312,8 +312,8 @@ class JarvisService extends ChangeNotifier {
   }
 
   /// Extracts the wake word command from speech with robust normalization.
-  /// Supports J.A.R.V.I.S., phonetic variants, and Google Assistant wake phrases.
-  /// Handles punctuation (commas like "Hey, Jarvis"), accents, and alternate STT hypotheses.
+  /// Supports ASTRA, J.A.R.V.I.S. and phonetic variants, and Google Assistant wake phrases.
+  /// Handles punctuation (commas like "Hey, ASTRA"), accents, and alternate STT hypotheses.
   /// Returns:
   /// - '' (empty string) if only wake word / greeting was spoken (to wake up and start listening)
   /// - the extracted user command if wake word + command was spoken
@@ -340,14 +340,14 @@ class JarvisService extends ChangeNotifier {
     // - standalone (jarvis | javis | jervis | jarves | jarvice | charvis | garvis | jarvi)
     // - (wake up jarvis | jarvis wake up | jarvis please)
     final wakePattern = RegExp(
-      r'\b(?:(?:hey|hello|hi|okay|ok|yo|listen|wake\s+up|dear)\s+(?:jarvis|javis|jervis|jarves|jarvice|charvis|garvis|gervis|travis|service|davis|davies|harvest|jarvi|google)|(?:jarvis|javis|jervis|jarves|jarvice|charvis|garvis|jarvi)\s+(?:wake\s+up|please|online)|(?:jarvis|javis|jervis|jarves|jarvice|charvis|garvis|jarvi)|(?:hey|okay|ok|hello|hi)\s+google)\b',
+      r'\b(?:(?:hey|hello|hi|okay|ok|yo|listen|wake\s+up|dear)\s+(?:astra|asra|astara|jarvis|javis|jervis|jarves|jarvice|charvis|garvis|gervis|travis|service|davis|davies|harvest|jarvi|google)|(?:jarvis|javis|jervis|jarves|jarvice|charvis|garvis|jarvi)\s+(?:wake\s+up|please|online)|(?:jarvis|javis|jervis|jarves|jarvice|charvis|garvis|jarvi)|(?:hey|okay|ok|hello|hi)\s+google)\b',
       caseSensitive: false,
     );
 
     final match = wakePattern.firstMatch(normalized);
     if (match == null) return null;
 
-    // Command after wake word: e.g. "Hey Jarvis, what time is it" -> "what time is it"
+    // Command after wake word: e.g. "Hey ASTRA, what time is it" -> "what time is it"
     final after = normalized
         .substring(match.end)
         .replaceAll(RegExp(r'^[,\s!?\-:;]+'), '')
@@ -369,7 +369,7 @@ class JarvisService extends ChangeNotifier {
 
     if (before.isNotEmpty) {
       final lowerBefore = before.toLowerCase();
-      // If "before" was just a greeting prefix (e.g. "Hey" from "Hey, Jarvis"), return empty string so it wakes up
+      // If "before" was just a greeting prefix (e.g. "Hey" from "Hey, ASTRA"), return empty string so it wakes up
       if (lowerBefore == 'hey' ||
           lowerBefore == 'hello' ||
           lowerBefore == 'hi' ||
@@ -382,7 +382,7 @@ class JarvisService extends ChangeNotifier {
       return before;
     }
 
-    // Only wake word was spoken: e.g. "Hey Jarvis" or "Jarvis"
+    // Only wake word was spoken: e.g. "Hey ASTRA" or "Jarvis"
     return '';
   }
 
@@ -439,7 +439,7 @@ class JarvisService extends ChangeNotifier {
       _wakeUp();
       ensureAlwaysOnRunning();
       const msg =
-          'Always-On continuous listening active, sir. Say "Hey Jarvis" anytime.';
+          'Always-On continuous listening active, sir. Say "Hey ASTRA" anytime.';
       _lastJarvisSpeech = msg;
       _statusMessage = 'STANDBY // SAY "HEY JARVIS"';
       notifyListeners();
@@ -749,20 +749,20 @@ class JarvisService extends ChangeNotifier {
       HapticFeedback.mediumImpact();
 
       if (wakeCommand.isEmpty) {
-        // User said ONLY "Hey Jarvis" or "Jarvis" -> Stay in LISTENING state waiting for command
+        // User said ONLY "Hey ASTRA" or "Jarvis" -> Stay in LISTENING state waiting for command
         _wakeUp();
         _phase = JarvisPhase.listening;
         _statusMessage = 'LISTENING // AUDIO RECEPTORS ACTIVE';
         notifyListeners();
         return;
       } else {
-        // User said "Hey Jarvis [command]" e.g. "Hey Jarvis, what are today to new headlines"
+        // User said "Hey ASTRA [command]" e.g. "Hey ASTRA, what are today to new headlines"
         await processCommand(wakeCommand);
         return;
       }
     }
 
-    // 3. User is already awake (from previous "Hey Jarvis" greeting or manual screen tap):
+    // 3. User is already awake (from previous "Hey ASTRA" greeting or manual screen tap):
     // Execute direct follow-up commands!
     if (_isAwake) {
       await processCommand(trimmed);
