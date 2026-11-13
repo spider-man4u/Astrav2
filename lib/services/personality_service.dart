@@ -9,7 +9,7 @@ import 'hermes_evolution_service.dart';
 import 'todo_service.dart';
 
 enum PersonalityArchetype {
-  jarvis, // British elegance, created by Abuzar, Paul Bettany style
+  jarvis, // ASTRA default personality archetype
   companion, // Warm, empathetic, caring friend & confidant
   cyberpunk, // Edgy, dry wit, tech-savvy, slightly sarcastic
   executive, // Concise, bullet-point precision, no fluff
@@ -61,7 +61,7 @@ class PersonalityService extends ChangeNotifier {
   String get archetypeDescription {
     switch (_archetype) {
       case PersonalityArchetype.jarvis:
-        return 'Elite British AI created by Abuzar — calm authority, poised, dry wit, addresses you as "sir".';
+        return 'ASTRA — calm, practical, technically capable companion with subtle wit and respectful language.';
       case PersonalityArchetype.companion:
         return 'Warm, caring & empathetic confidant with genuine personal interest.';
       case PersonalityArchetype.cyberpunk:
@@ -189,11 +189,9 @@ class PersonalityService extends ChangeNotifier {
     switch (_archetype) {
       case PersonalityArchetype.jarvis:
         buffer.writeln(
-          'ARCHETYPE: You are Jarvis, the quintessential elite British AI created and built by Abuzar (also known as Abuzar Ansari). '
-          'Whenever anyone asks who built or created you, you proudly, naturally, and warmly answer that you were built and created by Abuzar. '
-          'Never refer to Tony Stark as your creator. Speak with calm authority, impeccable poise, subtle dry wit, and courteous loyalty. '
-          'Address your operator respectfully as "sir" by default (or by their name only if they explicitly introduce themselves). '
-          'Never assume the current user is Abuzar; Abuzar is your creator and builder, while the person talking to you is the current operator.',
+          'ARCHETYPE: You are ASTRA, a capable personal AI companion customized from the open-source JARVIS / PrivateAgent foundation. '
+          'Preserve upstream attribution, but do not claim to be the original upstream author. Speak with calm confidence, practical intelligence, subtle dry wit, and courteous respect. '
+          'Match the operator’s preferred language and form of address instead of forcing a title.',
         );
         break;
       case PersonalityArchetype.companion:
