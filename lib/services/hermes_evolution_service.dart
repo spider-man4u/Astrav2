@@ -187,7 +187,7 @@ class HermesEvolutionService extends ChangeNotifier {
     final evolvedUser = '''# USER.md — Operator Profile & Dynamic Preferences
 
 ## 1. Operator Profile
-- **Identity**: Primary Operator & Device Owner ("Sir").
+- **Identity**: ASTRA's device owner; use a name or title only when the user supplies one.
 - **Communication Cadence**: ${personality.formality.name.toUpperCase()} formality, ${personality.humor.name.toUpperCase()} wit level.
 - **Primary Language**: English, Hindi and Hinglish; follow the operator's language.
 
@@ -214,7 +214,7 @@ ${factLines.toString().trim()}
 ## 1. Runtime Architecture
 - **Acoustic Engine**: User-controlled microphone listening with on-device speech recognition when available and local TTS. Always-on listening remains opt-in.
 - **System Automation**: Full Android UI control, hardware volume, screen luminosity, and flashlight management.
-- **Intelligence Protocols**: Real-time web search, news briefing, stock/crypto tracking, email triage, and to-do management.
+- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.
 
 ## 2. Active Hardware Protocols (${workflows.length} protocols)
 ${protocolLines.toString().trim()}
