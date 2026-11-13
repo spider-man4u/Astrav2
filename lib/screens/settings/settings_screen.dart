@@ -337,6 +337,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Allow cloud AI inference',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            subtitle: const Text(
+              'Off by default. When enabled, prompts, recent chat context and any screen context included in a request may be sent to the selected AI provider.',
+              style: TextStyle(fontSize: 11.5),
+            ),
+            value: _settings.cloudInferenceEnabled,
+            onChanged: (value) async {
+              await _settings.setCloudInferenceEnabled(value);
+              _lastSyncedProvider = _settings.provider;
+              _baseUrlController.text = _settings.baseUrl;
+              _modelController.text = _settings.model;
+              if (mounted) setState(() {});
+            },
+          ),
+          const Divider(height: 18),
           const Text(
             'Model Provider Preset',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
@@ -347,7 +367,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             runSpacing: 8,
             children: [
               for (final entry in SettingsService.providers.entries)
-                GlassPill(
+                if (entry.key == 'ollama' || _settings.isCloudInferenceAllowed)
+                  GlassPill(
                   label: entry.value.label,
                   isSelected: _settings.provider == entry.key,
                   onTap: () => _settings.setProvider(entry.key),
