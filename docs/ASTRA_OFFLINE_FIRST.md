@@ -42,7 +42,7 @@ A search query can itself disclose information to the search provider. The UI mu
 
 ## Local runtime direction
 
-The current app exposes an Ollama-compatible local endpoint. The target Android runtime is a bundled/on-device inference engine such as llama.cpp with GGUF models, so a separate desktop Ollama server is not required. Model downloads should be user-triggered or explicitly approved, integrity-checked and stored in app-private storage.
+The current branch exposes two loopback endpoints: Ollama at `127.0.0.1:11434/v1` and llama.cpp server at `127.0.0.1:8080/v1`. These are connection targets, not bundled runtimes: a local server and model still need to be installed and started. The target Android runtime is a bundled/on-device llama.cpp engine with GGUF models, so a separate desktop Ollama server is not required. Model downloads should be user-triggered or explicitly approved, integrity-checked and stored in app-private storage.
 
 Speech recognition must use a true on-device engine. Android's on-device SpeechRecognizer is used only when Android reports it is available. The longer-term target is a bundled offline engine such as whisper.cpp so speech behavior does not depend on the device's installed speech provider.
 
