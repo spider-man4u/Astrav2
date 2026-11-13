@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PrivateAgent</string>
-    <string name="accessibility_service_label">PrivateAgent Screen Control</string>
-    <string name="accessibility_service_description">PrivateAgent uses this service to read the current screen layout and perform taps, swipes, scrolling and typing on your behalf when you ask it to automate a task. No screen content leaves your device except when sent to the AI provider you configured. Disable this service at any time to stop all automation.</string>
+    <string name="app_name">ASTRA</string>
+    <string name="accessibility_service_label">ASTRA Screen Control</string>
+    <string name="accessibility_service_description">ASTRA uses this service to inspect the visible screen and perform taps, swipes, scrolling and typing only when you ask it to automate a task. Screen content is processed on-device by default. Cloud AI is blocked unless you explicitly enable it in ASTRA settings. Disable this service at any time to stop screen automation.</string>
 </resources>
