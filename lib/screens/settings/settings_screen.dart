@@ -385,20 +385,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             prefixIcon: const Icon(Icons.link_rounded, size: 20),
             keyboardType: TextInputType.url,
           ),
-          const SizedBox(height: 12),
-          GlassTextField(
-            controller: _apiKeyController,
-            labelText: 'API key',
-            obscureText: _obscureKey,
-            prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureKey ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                size: 20,
+          if (_settings.isCloudInferenceAllowed) ...[
+            const SizedBox(height: 12),
+            GlassTextField(
+              controller: _apiKeyController,
+              labelText: 'Cloud provider API key',
+              obscureText: _obscureKey,
+              prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureKey ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscureKey = !_obscureKey),
               ),
-              onPressed: () => setState(() => _obscureKey = !_obscureKey),
             ),
-          ),
+          ] else
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text(
+                'Cloud API keys are hidden and unused while Cloud AI is disabled. Local models do not need an API key.',
+                style: TextStyle(fontSize: 11.5),
+              ),
+            ),
           const SizedBox(height: 12),
           GlassTextField(
             controller: _modelController,
