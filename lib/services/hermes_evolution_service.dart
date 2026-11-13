@@ -189,10 +189,10 @@ class HermesEvolutionService extends ChangeNotifier {
 ## 1. Operator Profile
 - **Identity**: Primary Operator & Device Owner ("Sir").
 - **Communication Cadence**: ${personality.formality.name.toUpperCase()} formality, ${personality.humor.name.toUpperCase()} wit level.
-- **Primary Language**: English.
+- **Primary Language**: English, Hindi and Hinglish; follow the operator's language.
 
 ## 2. Daily Rhythms & Context
-- **Preferred Interaction**: Always-On desk listener with "Hey Jarvis" wake word.
+- **Preferred Interaction**: User-controlled voice activation with "Hey ASTRA" when a verified on-device wake-word engine is installed.
 - **Routine Schedule**: Morning intelligence briefings; evening Night Protocol wind-down.
 - **Active Focus**: Autonomous agents, hardware controls, financial telemetry, productivity.
 
@@ -212,7 +212,7 @@ ${factLines.toString().trim()}
     final evolvedAgent = '''# AGENT.md — Operating Protocols & Self-Evolving Capabilities
 
 ## 1. Runtime Architecture
-- **Acoustic Engine**: Always-on ambient listener with RMS silence detector & studio neural TTS.
+- **Acoustic Engine**: User-controlled microphone listening with on-device speech recognition when available and local TTS. Always-on listening remains opt-in.
 - **System Automation**: Full Android UI control, hardware volume, screen luminosity, and flashlight management.
 - **Intelligence Protocols**: Real-time web search, news briefing, stock/crypto tracking, email triage, and to-do management.
 
@@ -221,7 +221,7 @@ ${protocolLines.toString().trim()}
 
 ## 3. Self-Evolving Skill Distillation
 - Auto-distills recurring successful workflows into executable device routines.
-- Failsafe fallback: 100% on-device Ollama local-first privacy mode ready.
+- AI inference defaults to a loopback local model server. If unavailable, fail with a clear message; never silently fall back to cloud inference.
 
 ---
 *Self-evolved by Hermes Engine on ${DateTime.now().toLocal().toString().split('.').first}*
