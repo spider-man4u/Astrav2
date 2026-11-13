@@ -412,12 +412,17 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun obtainSpeechRecognizer(): SpeechRecognizer {
-        // ALWAYS use standard SpeechRecognizer.createSpeechRecognizer(this),
-        // which connects to Google's robust Speech Services (com.google.android.tts).
-        // DO NOT use createOnDeviceSpeechRecognizer on Android 12+ / Motorola,
-        // because Motorola delegates it to AiAiSpeechRecognitionService (com.google.android.as)
-        // which crashes with java.io.InterruptedIOException in PipedOutputStream.
-        return SpeechRecognizer.createSpeechRecognizer(this)
+        // ASTRA must not silently send microphone audio to a network-backed
+        // recognition service. Use Android's on-device recognizer only.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            !SpeechRecognizer.isOnDeviceRecognitionAvailable(this)
+        ) {
+            throw IllegalStateException(
+                "On-device speech recognition is unavailable on this device. " +
+                    "Install an offline recognition model or use text input."
+            )
+        }
+        return SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
     }
 
     private fun containsWakeWord(text: String): Boolean {
@@ -666,6 +671,7 @@ class MainActivity : FlutterActivity() {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2500L)
@@ -700,7 +706,8 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
                 "isAvailable" -> {
-                    val available = SpeechRecognizer.isRecognitionAvailable(this)
+                    val available = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                        SpeechRecognizer.isOnDeviceRecognitionAvailable(this)
                     result.success(available)
                 }
                 else -> result.notImplemented()
