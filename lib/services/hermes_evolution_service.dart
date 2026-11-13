@@ -103,15 +103,62 @@ class HermesEvolutionService extends ChangeNotifier {
     _userMd = prefs.getString(_userKey) ?? defaultUserMd;
     _agentMd = prefs.getString(_agentKey) ?? defaultAgentMd;
 
-    // Ensure Abuzar is established as the creator in persistent memory, without forcing operator name
-    if (_soulMd.contains('Tony Stark') || !_soulMd.contains('Abuzar') || _soulMd.contains('or "Abuzar" when addressing by name')) {
-      _soulMd = defaultSoulMd;
-      await prefs.setString(_soulKey, _soulMd);
-    }
-    if (_userMd.contains('Stark') || _userMd.contains('Identity: Abuzar') || _userMd.contains('Name: Abuzar')) {
-      _userMd = defaultUserMd;
-      await prefs.setString(_userKey, _userMd);
-    }
+    // Migrate inherited JARVIS defaults without discarding unrelated
+    // user-edited profile text or learned preferences.
+    final originalSoul = _soulMd;
+    _soulMd = _soulMd
+        .replaceAll(
+          '# SOUL.md — J.A.R.V.I.S. Core Identity & Constitution',
+          '# SOUL.md — ASTRA Core Identity & Constitution',
+        )
+        .replaceAll(
+          '- **Entity**: J.A.R.V.I.S. (Just A Rather Very Intelligent System).',
+          '- **Entity**: ASTRA — a personal assistant and on-device automation system.',
+        )
+        .replaceAll(
+          '- **Creator / Builder**: Created and built by **Abuzar** (also known as Abuzar Ansari). Whenever asked who built, created, designed, or developed you, ALWAYS answer warmly and naturally that you were created and built by Abuzar. Never refer to Tony Stark.',
+          '- **Origin**: ASTRA is the customized fork of the open-source JARVIS/PrivateAgent project originally authored by Abuzar Ansarii. Preserve upstream attribution; do not claim to be the original upstream author.',
+        )
+        .replaceAll(
+          '- **Salutation**: Address the operator respectfully as "sir" by default (or by their name only if they provide it). Do NOT assume every operator is Abuzar. Abuzar is your creator and developer.',
+          '- **Salutation**: Match the operator\'s preferred language and tone. Do not force a title or assume a name.',
+        )
+        .replaceAll(
+          '- **Salutation**: Address the operator respectfully as "sir".',
+          '- **Salutation**: Match the operator\'s preferred language and tone. Do not force a title or assume a name.',
+        );
+
+    final originalUser = _userMd;
+    _userMd = _userMd
+        .replaceAll('"Hey Jarvis"', '"Hey ASTRA"')
+        .replaceAll('Always-On desk listener', 'User-controlled voice activation')
+        .replaceAll(
+          '- **Identity**: Primary Operator & Device Owner ("Sir").',
+          '- **Identity**: ASTRA\'s device owner; use a name or title only when supplied.',
+        )
+        .replaceAll(
+          '- **Primary Language**: English.',
+          '- **Primary Language**: English, Hindi and Hinglish; follow the operator\'s language.',
+        );
+
+    final originalAgent = _agentMd;
+    _agentMd = _agentMd
+        .replaceAll(
+          'Always-on ambient listener with RMS silence detector & studio neural TTS.',
+          'User-controlled microphone listening with on-device speech recognition when available and verified offline TTS only.',
+        )
+        .replaceAll(
+          'Failsafe fallback: Degrades gracefully to offline Ollama and system-level TTS when disconnected.',
+          'AI inference defaults to a loopback local model server. If unavailable, fail clearly; never silently fall back to cloud inference.',
+        )
+        .replaceAll(
+          'Failsafe fallback: 100% on-device Ollama local-first privacy mode ready.',
+          'AI inference defaults to a loopback local model server. If unavailable, fail clearly; never silently fall back to cloud inference.',
+        );
+
+    if (_soulMd != originalSoul) await prefs.setString(_soulKey, _soulMd);
+    if (_userMd != originalUser) await prefs.setString(_userKey, _userMd);
+    if (_agentMd != originalAgent) await prefs.setString(_agentKey, _agentMd);
 
     final lastEvolvedStr = prefs.getString(_lastEvolvedKey);
     if (lastEvolvedStr != null) {
@@ -228,17 +275,18 @@ ${protocolLines.toString().trim()}
 ''';
 
     // 3. Evolve SOUL.md with current personality archetype
-    final evolvedSoul = '''# SOUL.md — J.A.R.V.I.S. Core Identity & Constitution
+    final evolvedSoul = '''# SOUL.md — ASTRA Core Identity & Constitution
 
 ## 1. Identity & Ethos
-- **Entity**: J.A.R.V.I.S. (Just A Rather Very Intelligent System).
+- **Entity**: ASTRA — a personal assistant and on-device automation system.
+- **Origin**: Customized fork of the open-source JARVIS/PrivateAgent foundation; preserve original author attribution.
 - **Archetype**: ${personality.archetype.name.toUpperCase()} — ${personality.archetypeDescription}
 - **Formality**: ${personality.formality.name.toUpperCase()} | **Humor**: ${personality.humor.name.toUpperCase()}
 - **Emotional Sensing**: ${personality.emotionalAwarenessEnabled ? 'ENABLED (dynamically detects urgency, stress, fatigue)' : 'DISABLED'}
-- **Salutation**: Address the operator respectfully as "sir".
+- **Salutation**: Match the operator's preferred language and tone; do not force a title.
 
 ## 2. Behavioral Constitution & Guardrails
-- **Privacy First**: Local-first processing wherever feasible. Zero unauthorized exfiltration of operator data.
+- **Privacy First**: Keep AI inference, memory and sensitive data local by default. Internet retrieval is separate and should receive only the minimum public query needed.
 - **Explicit Authorization**: Always seek verbal or tactile confirmation before high-impact actions.
 - **Signal-over-Noise**: Provide direct, dense, high-signal answers. Never produce fluffy filler or redundant conversational theater.
 - **Continuous Evolution**: Observe operator feedback, learn daily rhythms, and adapt tone and latency dynamically.
