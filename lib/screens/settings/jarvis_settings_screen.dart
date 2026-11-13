@@ -2235,7 +2235,7 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
-                'Keeps AI inference on the local endpoint. Web lookups can still use the internet; cloud AI remains blocked unless separately enabled.',
+                'On keeps AI inference on the local endpoint. Turning this off alone does not enable cloud AI; use the separate Cloud AI consent switch. Web lookups can still use the internet.',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.localFirstPrivacyMode,
