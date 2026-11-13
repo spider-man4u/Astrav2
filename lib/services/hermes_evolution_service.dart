@@ -154,6 +154,14 @@ class HermesEvolutionService extends ChangeNotifier {
         .replaceAll(
           'Failsafe fallback: 100% on-device Ollama local-first privacy mode ready.',
           'AI inference defaults to a loopback local model server. If unavailable, fail clearly; never silently fall back to cloud inference.',
+        )
+        .replaceAll(
+          '- **Intelligence Protocols**: Real-time web search synthesis, news briefing, stock/crypto tracking, email triage, and to-do management.',
+          '- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.',
+        )
+        .replaceAll(
+          '- **Intelligence Protocols**: Real-time web search, news briefing, stock/crypto tracking, email triage, and to-do management.',
+          '- **Intelligence Protocols**: Local task handling plus online public-information retrieval when requested. Never attach private memory or chat history to retrieval requests.',
         );
 
     if (_soulMd != originalSoul) await prefs.setString(_soulKey, _soulMd);
