@@ -59,7 +59,7 @@ class HermesEvolutionService extends ChangeNotifier {
 
 ## 1. Operator Profile
 - **Identity**: Primary Operator (Device Owner).
-- **Salutation**: "sir" (unless the operator provides their own name).
+- **Salutation**: Use the operator's chosen name or form of address; do not assume a title.
 - **Communication Cadence**: Concise, articulate, direct answers; verbal voice output preferred in hands-free mode.
 - **Primary Language**: Support English, Hindi and Hinglish; follow the operator's chosen language.
 
@@ -75,9 +75,9 @@ class HermesEvolutionService extends ChangeNotifier {
   static const String defaultAgentMd = '''# AGENT.md — Operating Protocols & Self-Evolving Capabilities
 
 ## 1. Runtime Capabilities
-- **Acoustic Engine**: Continuous background listening with real-time RMS silence boundary detector & neural voice synthesis.
+- **Acoustic Engine**: On-device speech recognition only when the OS confirms it is available; always-on listening is opt-in. Use local TTS when available.
 - **System Automation**: Full Android UI control via accessibility, hardware volume, screen luminosity, and flashlight management.
-- **Intelligence Protocols**: Real-time web search synthesis, news briefing, stock/crypto tracking, email triage, and to-do management.
+- **Intelligence Protocols**: Local task handling plus online search, news and public-data retrieval when explicitly requested. Keep private memory and chat history out of retrieval requests.
 
 ## 2. Active Hardware Protocols (Hermes Engine)
 - **Study Protocol**: Mutes distracting audio alerts, sets display reading luminosity to 45%.
