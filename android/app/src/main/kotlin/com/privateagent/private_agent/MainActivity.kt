@@ -44,6 +44,44 @@ import kotlin.math.sqrt
  */
 class MainActivity : FlutterActivity() {
 
+    override fun onResume() {
+        super.onResume()
+        // Re-apply after returning from system UI; Android/OEM policy remains
+        // authoritative and may still choose a lower refresh rate.
+        window.decorView.post { requestHighestRefreshRate() }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun requestHighestRefreshRate() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
+        val display = windowManager.defaultDisplay
+        val currentMode = display.mode
+        val highestMode = display.supportedModes
+            .filter {
+                it.physicalWidth == currentMode.physicalWidth &&
+                    it.physicalHeight == currentMode.physicalHeight
+            }
+            .maxByOrNull { it.refreshRate }
+            ?: return
+
+        if (highestMode.refreshRate <= 60f) return
+
+        val params = window.attributes
+        var changed = false
+        if (params.preferredDisplayModeId != highestMode.modeId) {
+            params.preferredDisplayModeId = highestMode.modeId
+            changed = true
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            params.preferredRefreshRate != highestMode.refreshRate
+        ) {
+            params.preferredRefreshRate = highestMode.refreshRate
+            changed = true
+        }
+        if (changed) window.attributes = params
+    }
+
     private val channelName = "com.privateagent/accessibility"
     private val speechChannelName = "com.privateagent/speech"
     private var accessibilityChannel: MethodChannel? = null
