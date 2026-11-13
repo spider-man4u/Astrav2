@@ -2230,16 +2230,34 @@ class _JarvisSettingsScreenState extends State<JarvisSettingsScreen> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text(
-                'Local-First Privacy Mode',
+                'ASTRA Local AI Only',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               subtitle: const Text(
-                'Forces 100% on-device AI via Ollama (127.0.0.1:11434) & offline TTS — zero data sent outside your device',
+                'Keeps AI inference on the local endpoint. Web lookups can still use the internet; cloud AI remains blocked unless separately enabled.',
                 style: TextStyle(fontSize: 12),
               ),
               value: _settings.localFirstPrivacyMode,
               onChanged: (val) async {
                 await _settings.setLocalFirstPrivacyMode(val);
+                setState(() {});
+              },
+            ),
+            const Divider(height: 20),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(
+                'Allow Online Neural Voice',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text(
+                'When enabled, response text is sent to Microsoft Edge TTS for speech synthesis. Off by default.',
+                style: TextStyle(fontSize: 12),
+              ),
+              value: _settings.remoteTtsEnabled,
+              onChanged: (val) async {
+                await _settings.setRemoteTtsEnabled(val);
+                await _settings.setUseNeuralVoice(val);
                 setState(() {});
               },
             ),
