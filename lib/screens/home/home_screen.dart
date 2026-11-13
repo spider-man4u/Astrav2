@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _executor.addListener(_onExecutorUpdate);
     _mode = SettingsService.instance.appMode;
 
-    // Connect Google Assistant style wake-word trigger to auto-switch into JARVIS HUD
+    // Connect Google Assistant style wake-word trigger to auto-switch into ASTRA HUD
     JarvisService.instance.onWakeWordTriggered = () {
       if (mounted && _mode != AppMode.jarvis) {
         setState(() => _mode = AppMode.jarvis);
@@ -842,7 +842,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  /// Agent / Chat / JARVIS mode switcher with Liquid Glass UI.
+  /// Agent / Chat / ASTRA mode switcher with Liquid Glass UI.
   Widget _modeSwitcher(ThemeData theme) {
     return LiquidGlassModeSwitcher(
       selectedMode: _mode,
